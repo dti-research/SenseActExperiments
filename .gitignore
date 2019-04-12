@@ -1,0 +1,6 @@
+__pycache__
+.idea
+*.swp
+*.pyc
+senseact/lib/
+senseact.egg-info/
