@@ -161,12 +161,12 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt):
     time_now = time.time()
 
     file.write("Time,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
-    step = 0
+    i = 0
 
     while log_running.value:
         if time.time() - time_now >= dt:
             time_now = time.time()
-            file.write(str(step) + "," + str(env._reward_.value) + "," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) + "," + str(env._x_target_[0]) + "," + 			str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + "\n")
+            file.write(str(i) + "," + str(env._reward_.value) + "," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) + "," + str(env._x_target_[0]) + "," + 			str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + "\n")
             i += 1
 
     file.close()
