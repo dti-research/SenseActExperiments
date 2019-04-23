@@ -16,6 +16,8 @@ parser.add_argument('--gamma', type=float, default=0.96833,
                     help='gamma (default: 0.96833)')
 parser.add_argument('--lamda', type=float, default=0.99874,
                     help='lamda (default: 0.99874)')
+parser.add_argument('--log_dir', type=str, default="../../logs",
+                    help='path to put log files')
 args = parser.parse_args()
 
 print("{} {} {} {} {} {} {}".format(args.hid_size,
@@ -25,3 +27,5 @@ print("{} {} {} {} {} {} {}".format(args.hid_size,
                                     args.max_kl,
                                     args.gamma,
                                     args.lamda))
+
+print("Printing log files to: '{}'".format(args.log_dir))

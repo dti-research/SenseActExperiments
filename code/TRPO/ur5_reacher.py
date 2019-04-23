@@ -3,11 +3,14 @@
 #
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
+from __future__ import print_function
 import time
 import copy
 import numpy as np
+import os
 import io
 import datetime
+import argparse
 
 import baselines.common.tf_util as U
 from multiprocessing import Process, Value, Manager
@@ -18,6 +21,11 @@ from senseact.envs.ur.reacher_env import ReacherEnv
 from senseact.utils import tf_set_seeds, NormalizedEnv
 from helper import create_callback
 from ur_setups import setup
+
+parser = argparse.ArgumentParser(description='Benchmarking DRL on Real World Robots')
+parser.add_argument('--log_dir', type=str, default="../../logs",
+                    help='path to put log files')
+args = parser.parse_args()
 
 def main():
     # Set hyperparameters here
@@ -79,7 +87,7 @@ def main():
                                      "episodic_returns": [],
                                      "episodic_lengths": [], }) # A manager dictionary object containing `episodic returns` and `episodic lengths`
     # Spawn logging process
-    pp = Process(target=log_to_csv, args=(env, 2048, shared_returns, log_running, dt))
+    pp = Process(target=log_to_csv, args=(env, 2048, shared_returns, log_running, dt, args.log_dir))
     pp.start()
 
     # Create callback function for logging data from baselines TRPO learn
@@ -106,7 +114,7 @@ def main():
 
     env.close()
 
-def log_to_csv(env, batch_size, shared_returns, log_running, dt): 
+def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir): 
     """ Process for logging all data generated during runtime.
     Args:
 	env: An instance of ReacherEnv
@@ -115,9 +123,11 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt):
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
 
-    file = open("trpo_logs.csv", "w")
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
 
     time_now = time.time()
+    file = open(os.path.join(log_dir, str(time_now)+".csv"), "w")
 
     file.write("Time,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
     i = 0
