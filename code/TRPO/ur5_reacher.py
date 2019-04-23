@@ -80,6 +80,9 @@ def main():
     def policy_fn(name, ob_space, ac_space):
         return MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
             hid_size=hid_size, num_hid_layers=num_hid_layers)
+    
+    print(np.shape(env._observation_space))
+    print(np.shape(env._action_space))
 
     # CHANGES HERE!! Create and start logging process  CHANGES HERE!!
     log_running = Value('i', 1) # flag
@@ -123,7 +126,7 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir):
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
 
-    if not os.path.exists(log_dir):
+    """if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
     time_now = time.time()
@@ -138,8 +141,53 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir):
             file.write(str(i) + "," + str(env._reward_.value) + "," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) + "," + str(env._x_target_[0]) + "," + 			str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + "\n")
             i += 1
 
-    file.close()
+    file.close()"""
 
+    print("\n Kindred plotting routine: \n")
+    time.sleep(5.0) # Process sleep for 5 seconds hmmmm
+    count = 0 # Initialize a counter to zero 
+    rets = []
+
+    old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
+    while log_running.value:
+        # make a copy of the whole dict to avoid episode_returns and episodic_lengths getting desync
+        copied_returns = copy.deepcopy(shared_returns)
+        if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
+            returns = np.array(copied_returns['episodic_returns'])
+            old_size = len(copied_returns['episodic_returns'])
+            window_size_steps = 5000
+            x_tick = 1000
+
+            if copied_returns['episodic_lengths']:
+                ep_lens = np.array(copied_returns['episodic_lengths'])
+            else:
+                ep_lens = batch_size * np.arange(len(returns))
+            cum_episode_lengths = np.cumsum(ep_lens)
+
+            if cum_episode_lengths[-1] >= x_tick:
+                steps_show = np.arange(x_tick, cum_episode_lengths[-1] + 1, x_tick)
+                rets = []
+
+                for i in range(len(steps_show)):
+                    rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
+                                             (cum_episode_lengths < x_tick * (i + 1))]
+                    if rets_in_window.any():
+                        rets.append(np.mean(rets_in_window))
+                        print("hmm: {}\n".format(np.arange(1, len(rets) + 1)))
+                        print("rets: {}\n".format(rets))
+
+                count += 1
+        """
+        print("xt: {}\n".format(env._x_target_[2]))
+        print("yt: {}\n".format(env._x_target_[1]))
+        print("zt: {} \n".format(env._x_target_[0]))
+        print("x: {}\n".format(env._x_[2]))
+        print("y: {}\n".format(env._x_[1]))
+        print("z: {}\n".format(env._x_[0]))
+        print("i: {}\n".format(count))
+        print("hmm: {}\n".format(np.arange(1, len(rets) + 1)))
+        print("rets: {}\n".format(rets))
+        """
 
 if __name__ == '__main__':
     main()
