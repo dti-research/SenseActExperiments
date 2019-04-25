@@ -23,7 +23,7 @@ from helper import create_callback
 from ur_setups import setup
 
 parser = argparse.ArgumentParser(description='Benchmarking DRL on Real World Robots')
-parser.add_argument('--log_dir', type=str, default="../../logs",
+parser.add_argument('--log_dir', type=str, default="../../logs/TRPO",
                     help='path to put log files')
 args = parser.parse_args()
 
@@ -90,7 +90,7 @@ def main():
                                      "episodic_returns": [],
                                      "episodic_lengths": [], }) # A manager dictionary object containing `episodic returns` and `episodic lengths`
     # Spawn logging process
-    pp = Process(target=log_to_csv, args=(env, 2048, shared_returns, log_running, dt, args.log_dir))
+    pp = Process(target=log_function, args=(env, timesteps_per_batch, shared_returns, log_running, args.log_dir))
     pp.start()
 
     # Create callback function for logging data from baselines TRPO learn
@@ -117,7 +117,7 @@ def main():
 
     env.close()
 
-def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir): 
+def log_function(env, batch_size, shared_returns, log_running, log_dir): 
     """ Process for logging all data generated during runtime.
     Args:
 	env: An instance of ReacherEnv
@@ -125,38 +125,44 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir):
         shared_returns: A manager dictionary object containing `episodic returns` and `episodic lengths`
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
+    global ITERATION
+    
+    old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
+    time.sleep(5.0) # Process sleep for 5 seconds
+    ep = 1
+    prev_ep = 1
+    prev_step = 0
 
-    """if not os.path.exists(log_dir):
+    if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
     time_now = time.time()
     file = open(os.path.join(log_dir, str(time_now)+".csv"), "w")
 
-    file.write("Time,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
-    i = 0
-
-    while log_running.value:
-        if time.time() - time_now >= dt:
-            time_now = time.time()
-            file.write(str(i) + "," + str(env._reward_.value) + "," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) + "," + str(env._x_target_[0]) + "," + 			str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + "\n")
-            i += 1
-
-    file.close()"""
-
-    print("\n Kindred plotting routine: \n")
-    time.sleep(5.0) # Process sleep for 5 seconds hmmmm
-    count = 0 # Initialize a counter to zero 
-    rets = []
-
-    old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
+    file.write("Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
+    
     while log_running.value:
         # make a copy of the whole dict to avoid episode_returns and episodic_lengths getting desync
         copied_returns = copy.deepcopy(shared_returns)
+        episode = len(copied_returns['episodic_lengths'])
+
+        # Debugging 
+        #print("episodes: {}".format(len(copied_returns['episodic_lengths'])))
+        #print("returns: {}".format(copied_returns['episodic_returns']))
+
+        """# Write current values to file
+
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
             returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
-            window_size_steps = 5000
-            x_tick = 1000
+
+            file.write(str(episode) + "," + str(episode/0.04) + "," + str(copied_returns['episodic_returns'][-1]) + 
+                        "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
+                        + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]))
+            
+            # Calculate rolling average of rewards
+            window_size_steps = 500
+            x_tick = 100
 
             if copied_returns['episodic_lengths']:
                 ep_lens = np.array(copied_returns['episodic_lengths'])
@@ -172,22 +178,7 @@ def log_to_csv(env, batch_size, shared_returns, log_running, dt, log_dir):
                     rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
-                        rets.append(np.mean(rets_in_window))
-                        print("hmm: {}\n".format(np.arange(1, len(rets) + 1)))
-                        print("rets: {}\n".format(rets))
-
-                count += 1
-        """
-        print("xt: {}\n".format(env._x_target_[2]))
-        print("yt: {}\n".format(env._x_target_[1]))
-        print("zt: {} \n".format(env._x_target_[0]))
-        print("x: {}\n".format(env._x_[2]))
-        print("y: {}\n".format(env._x_[1]))
-        print("z: {}\n".format(env._x_[0]))
-        print("i: {}\n".format(count))
-        print("hmm: {}\n".format(np.arange(1, len(rets) + 1)))
-        print("rets: {}\n".format(rets))
-        """
+                        rets.append(np.mean(rets_in_window))"""
 
 if __name__ == '__main__':
     main()
