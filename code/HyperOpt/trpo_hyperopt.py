@@ -194,7 +194,7 @@ def run_trpo(hyperparams, shared_returns):
 
     # Train baselines TRPO
     learn(env, policy_fn,
-          max_timesteps=2000,
+          max_timesteps=15000,
           timesteps_per_batch=hyperparams['timesteps_per_batch'],
           max_kl=hyperparams['max_kl'],
           cg_iters=10,
@@ -213,7 +213,6 @@ def run_trpo(hyperparams, shared_returns):
 
     sess.close()
     env.close()
-    #tf.reset_default_graph()
 
 # Function for logging relevant values to csv-file
 def log_function(env, batch_size, shared_returns, log_running): 
@@ -242,12 +241,12 @@ def log_function(env, batch_size, shared_returns, log_running):
             old_size = len(copied_returns['episodic_returns'])
             episode = len(copied_returns['episodic_lengths'])
 
-            file.write(str(episode) + ',' + str(int(episode/0.04)) + ',' + str(copied_returns['episodic_returns'][-1]) + 
+            file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(copied_returns['episodic_returns'][-1]) + 
                         ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
                         + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
 
-        """# Calculate rolling average of rewards
-            #returns = np.array(copied_returns['episodic_returns'])
+        # Calculate rolling average of rewards
+            returns = np.array(copied_returns['episodic_returns'])
             window_size_steps = 5000
             x_tick = 1000
 
@@ -265,7 +264,7 @@ def log_function(env, batch_size, shared_returns, log_running):
                     rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
-                        rets.append(np.mean(rets_in_window))"""
+                        rets.append(np.mean(rets_in_window))
         
     file.close()
 
