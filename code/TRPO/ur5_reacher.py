@@ -150,7 +150,7 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
             old_size = len(copied_returns['episodic_returns'])
 
             if len(rets):
-                file.write(str(episode) + ',' + str(int(episode*100) + ',' + str(rets[-1]) + 
+                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(rets[-1]) + 
                            ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
                            + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
             else:
