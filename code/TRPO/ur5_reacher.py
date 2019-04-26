@@ -95,7 +95,7 @@ def main():
 
     # Train baselines TRPO
     learn(env, policy_fn,
-          max_timesteps=150000,
+          max_timesteps=4096,
           timesteps_per_batch=timesteps_per_batch,
           max_kl=max_kl,
           cg_iters=cg_iters,
@@ -123,14 +123,15 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
 
-    old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
+    old_size = len(shared_returns['episodic_returns']) 
     time.sleep(5.0) # Process sleep for 5 seconds
+    rets = []
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
     time_now = time.time()
-    file = open(os.path.join(os.path.join(log_dir, str(time_now)+".csv")), 'w')
+    file = open(os.path.join(os.path.join(log_dir, str(time_now)+".csv")), 'a')
 
     file.write("Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
     #file.write("Episode,Step,Reward \n") # Header with names for all values logged
@@ -143,16 +144,22 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
         # Write current values to file
 
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
-            #returns = np.array(copied_returns['episodic_returns'])
+            print("HERE")
+            returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
 
-            file.write(str(episode) + "," + str(int(episode/0.04)) + "," + str(copied_returns['episodic_returns'][-1]) + 
-                        "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
-                        + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]))
+            if len(rets):
+                file.write(str(episode) + "," + str(int(episode/0.04)) + "," + str(rets[-1]) + 
+                           "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
+                           + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + '\n')
+            else:
+                file.write(str(episode) + "," + str(int(episode/0.04)) + "," + 'NaN' + 
+                           "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
+                           + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + '\n')
 
             #file.write(str(episode) + "," + str(episode/0.04) + "," + str(copied_returns['episodic_returns'][-1]) + "\n")
             
-            """# Calculate rolling average of rewards
+            # Calculate rolling average of rewards
             window_size_steps = 5000
             x_tick = 1000
 
@@ -164,14 +171,13 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
 
             if cum_episode_lengths[-1] >= x_tick:
                 steps_show = np.arange(x_tick, cum_episode_lengths[-1] + 1, x_tick)
-                rets = []
 
                 for i in range(len(steps_show)):
                     rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
-                        rets.append(np.mean(rets_in_window))"""
-
+                        rets.append(np.mean(rets_in_window))
+                        
     file.close()
 
 if __name__ == '__main__':
