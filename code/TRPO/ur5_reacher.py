@@ -133,8 +133,7 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
     time_now = time.time()
     file = open(os.path.join(os.path.join(log_dir, str(time_now)+".csv")), 'a')
 
-    file.write("Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
-    #file.write("Episode,Step,Reward \n") # Header with names for all values logged
+    file.write('Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n') # Header with names for all values logged
 
     while log_running.value:
         # make a copy of the whole dict to avoid episode_returns and episodic_lengths getting desync
@@ -142,9 +141,7 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
         episode = len(copied_returns['episodic_lengths'])
 
         # Write current values to file
-
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
-            print("HERE")
             returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
 
@@ -156,8 +153,6 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
                 file.write(str(episode) + "," + str(int(episode/0.04)) + "," + 'NaN' + 
                            "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
                            + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]) + '\n')
-
-            #file.write(str(episode) + "," + str(episode/0.04) + "," + str(copied_returns['episodic_returns'][-1]) + "\n")
             
             # Calculate rolling average of rewards
             window_size_steps = 5000
