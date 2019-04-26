@@ -80,9 +80,6 @@ def main():
     def policy_fn(name, ob_space, ac_space):
         return MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
             hid_size=hid_size, num_hid_layers=num_hid_layers)
-    
-    print(np.shape(env._observation_space))
-    print(np.shape(env._action_space))
 
     # CHANGES HERE!! Create and start logging process  CHANGES HERE!!
     log_running = Value('i', 1) # flag
@@ -125,44 +122,39 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
         shared_returns: A manager dictionary object containing `episodic returns` and `episodic lengths`
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
-    global ITERATION
-    
+
     old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
     time.sleep(5.0) # Process sleep for 5 seconds
-    ep = 1
-    prev_ep = 1
-    prev_step = 0
 
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
     time_now = time.time()
-    file = open(os.path.join(log_dir, str(time_now)+".csv"), "w")
+    file = open(os.path.join(os.path.join(log_dir, str(time_now)+".csv")), 'w')
 
     file.write("Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
-    
+    #file.write("Episode,Step,Reward \n") # Header with names for all values logged
+
     while log_running.value:
         # make a copy of the whole dict to avoid episode_returns and episodic_lengths getting desync
         copied_returns = copy.deepcopy(shared_returns)
         episode = len(copied_returns['episodic_lengths'])
 
-        # Debugging 
-        #print("episodes: {}".format(len(copied_returns['episodic_lengths'])))
-        #print("returns: {}".format(copied_returns['episodic_returns']))
-
-        """# Write current values to file
+        # Write current values to file
 
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
-            returns = np.array(copied_returns['episodic_returns'])
+            #returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
 
-            file.write(str(episode) + "," + str(episode/0.04) + "," + str(copied_returns['episodic_returns'][-1]) + 
+            file.write(str(episode) + "," + str(int(episode/0.04)) + "," + str(copied_returns['episodic_returns'][-1]) + 
                         "," + str(env._x_target_[2]) + "," + str(env._x_target_[1])  + "," + str(env._x_target_[0])
                         + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]))
+
+            #file.write(str(episode) + "," + str(episode/0.04) + "," + str(copied_returns['episodic_returns'][-1]) + "\n")
             
-            # Calculate rolling average of rewards
-            window_size_steps = 500
-            x_tick = 100
+            """# Calculate rolling average of rewards
+            window_size_steps = 5000
+            x_tick = 1000
 
             if copied_returns['episodic_lengths']:
                 ep_lens = np.array(copied_returns['episodic_lengths'])
@@ -179,6 +171,8 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
                         rets.append(np.mean(rets_in_window))"""
+
+    file.close()
 
 if __name__ == '__main__':
     main()
