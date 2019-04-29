@@ -27,7 +27,7 @@ from ur_setups import setup
 
 # Argparser used for log directories
 parser = argparse.ArgumentParser(description='Hyperparameter optimization')
-parser.add_argument('--log_dir', type=str, default="../../logs/HyperOpt/TRPO",
+parser.add_argument('--log_dir', type=str, default='../../logs/HyperOpt/TRPO',
                     help='path to put log files')
 args = parser.parse_args()
 
@@ -35,16 +35,16 @@ args = parser.parse_args()
 if not os.path.exists(args.log_dir):
     os.makedirs(args.log_dir)
 time_now = time.time()
-filename = os.path.join(args.log_dir, str(time_now) + "_trpo_logs")
-hp_filename = os.path.join(args.log_dir, str(time_now) + "hp_trpo" + ".csv")
+filename = os.path.join(args.log_dir, str(time_now) + '_trpo_logs')
+hp_filename = os.path.join(args.log_dir, str(time_now) + 'hp_trpo.csv')
 
 # Define the search space of each hyperparameter for the Bayesian hyperparameter optimization
 space = { 
-        'num_hid_layers': hp.choice('num_hid_layers', # NEEDS EDITING to have correct values for hid_size AND might not work, saw issues with this in stack exchange
-                                       [{'num_hid_layers': 1, 
+        'num_hid_layers': hp.choice('num_hid_layers', [
+                                       {'num_hid_layers': 1, 
                                                'hid_size': hp.choice('1_hid_size', [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192])},#depending on # hidden layers
                                         {'num_hid_layers': 2,
-                                               'hid_size': hp.choice('2_hid_size', [8, 16, 32, 64, 128])},
+                                               'hid_size': hp.choice('2_hid_size', [8, 16, 32, 64, 128, 256])},
                                         {'num_hid_layers': 3,
                                                'hid_size': hp.choice('3_hid_size', [8, 16, 32, 64, 128])},
                                         {'num_hid_layers': 4,
@@ -62,6 +62,10 @@ def main():
     ITERATION = 0
     max_evaluations = 10
 
+    file = open(hp_filename, 'w')
+    file.write('iteration,loss,hidden-layers,hidden-sizes,batch-size,stepsize,kl-divergence,gamma,lambda\n')
+    file.close()
+
     # Keep track of results
     bayes_trials = Trials()
 
@@ -71,7 +75,8 @@ def main():
 		algo = tpe.suggest, 
 		max_evals = max_evaluations, 
 		trials = bayes_trials)
-
+    
+    print(bayes_trials)
     print(best)
 
 
@@ -81,27 +86,22 @@ def objective(hyperparams):
 
     # Keep track of evaluations
     global ITERATION
-
-    # For logging rewards
-    returns = []
-    shared_returns = Manager().dict({"write_lock": False,
-                                     "episodic_returns": [],
-                                     "episodic_lengths": [],
-                                     "rets": []}) # A manager dictionary object containing `episodic returns` and `episodic lengths`
-
     ITERATION += 1
 
-    # Get all the current hyperparameter values I think, not sure
+    shared_returns = Manager().dict({'write_lock': False,
+                                     'episodic_returns': [],
+                                     'episodic_lengths': [],
+                                     'mean_returns': []}) # A manager dictionary object containing `episodic returns` and `episodic lengths`
+
+    # Get all the current hyperparameter values
     hid_size = hyperparams['num_hid_layers'].get('hid_size') # Need to retrieve like this, because it is nested in dictionary
 
     hyperparams['num_hid_layers'] = hyperparams['num_hid_layers']['num_hid_layers']
     hyperparams['hid_size'] = hid_size
-
     hyperparams['timesteps_per_batch'] = hyperparams['timesteps_per_batch']
 
     for parameter_name in ['vf_stepsize', 'max_kl', 'gamma', 'lam']:
         hyperparams[parameter_name] = float(hyperparams[parameter_name])
-
 
     # Run the TRPO algorithm
     pp2 = Process(target=run_trpo, args=(hyperparams, shared_returns)) # Changed parameters here, not sure if it still works, maybe it doesn't have accessto needed data
@@ -111,32 +111,29 @@ def objective(hyperparams):
     pp2.join()
 
     copied_returns = copy.deepcopy(shared_returns)
-    returns = copied_returns['episodic_returns']
 
     # Extract the highest reward
-    best_score = max(returns)
+    best_score = max(copied_returns['mean_returns'])
 
     # Transform to loss, to obtain a function to minimize
-    loss = 1 - best_score
+    loss = - best_score
 
     # Log the current hyperparameter setting, iteration and loss in a csv-file
-    file = open(hp_filename, "a")
-    file.write("loss: " + str(loss) + "," + "iteration: " + str(ITERATION) + "," + "hidden layers: " + str(hyperparams['num_hid_layers']) 
-                + "," + "hidden size: " + str(hyperparams['hid_size']) + ","  + "batch size: " + str(hyperparams['timesteps_per_batch']) 
-                + "," + "stepsize: " + str(hyperparams['vf_stepsize']) + "," + "kl divergence: " + str(hyperparams['max_kl']) + "," + 
-                "gamma: " + str(hyperparams['gamma']) + "," + "lambda: " + str(hyperparams['lam']) + " \n")
+    file = open(hp_filename, 'a')
+    file.write(str(ITERATION) + ',' + str(loss) + ',' + str(hyperparams['num_hid_layers']) + ',' + str(hyperparams['hid_size']) + 
+                ',' + str(hyperparams['timesteps_per_batch']) + ',' + str(hyperparams['vf_stepsize']) + ',' + 
+                str(hyperparams['max_kl']) + ',' + str(hyperparams['gamma']) + ',' + str(hyperparams['lam']) + '\n')
     file.close()
 
     # Return loss, current hyperparameter configuration, iteration and key indicating if evaluation was succesful
     return {'loss': loss, 'hyperparams': hyperparams, 'iteration': ITERATION, 'status': STATUS_OK}
 
 
-
 # Function for running TRPO
 def run_trpo(hyperparams, shared_returns):
     """All the functionality implemented to run the RL algorithm on the UR robot"""
 
-    # use fixed random state
+    # Use fixed random state
     rand_state = np.random.RandomState(1).get_state()
     np.random.set_state(rand_state)
     tf_set_seeds(np.random.randint(1, 2**31 - 1))
@@ -145,11 +142,11 @@ def run_trpo(hyperparams, shared_returns):
             setup=setup,
             host=None,
             dof=2,
-            control_type="velocity",
-            target_type="position",
-            reset_type="zero",
-            reward_type="precision",
-            derivative_type="none",
+            control_type='velocity',
+            target_type='position',
+            reset_type='zero',
+            reward_type='precision',
+            derivative_type='none',
             deriv_action_max=5,
             first_deriv_max=2,
             accel_max=1.4,
@@ -159,7 +156,7 @@ def run_trpo(hyperparams, shared_returns):
             episode_length_step=None,
             actuation_sync_period=1,
             dt=0.04,
-            run_mode="multiprocess",
+            run_mode='multiprocess',
             rllab_box=False,
             movej_t=2.0,
             delay=0.0,
@@ -174,14 +171,18 @@ def run_trpo(hyperparams, shared_returns):
     sess.__enter__()
     
     def policy_fn(name, ob_space, ac_space):
-        return MlpPolicy(name=name, ob_space=ob_space, ac_space=ac_space,
-            hid_size=hyperparams['hid_size'], num_hid_layers=hyperparams['num_hid_layers'])
+        return MlpPolicy(name=name, 
+                         ob_space=ob_space, 
+                         ac_space=ac_space,
+                         hid_size=hyperparams['hid_size'], 
+                         num_hid_layers=hyperparams['num_hid_layers']
+                        )
 
     # Create and start logging process
-    log_running = Value('i', 1) # flag
+    log_running = Value('i', 1) 
 
     # Spawn logging process
-    pp = Process(target=log_function, args=(env, hyperparams['timesteps_per_batch'], shared_returns, log_running)) # Changed parameters here, not sure if it still works, maybe it doesn't have accessto needed data
+    pp = Process(target=log_function, args=(env, hyperparams['timesteps_per_batch'], shared_returns, log_running)) 
     pp.start()
 
     # Create callback function for logging data from baselines TRPO learn
@@ -189,7 +190,7 @@ def run_trpo(hyperparams, shared_returns):
 
     # Train baselines TRPO
     learn(env, policy_fn,
-          max_timesteps=1500,
+          max_timesteps=150000,
           timesteps_per_batch=hyperparams['timesteps_per_batch'],
           max_kl=hyperparams['max_kl'],
           cg_iters=10,
@@ -201,7 +202,6 @@ def run_trpo(hyperparams, shared_returns):
           callback=kindred_callback
           )
 
-
     # Safely terminate plotter process
     log_running.value = 0  # shutdown ploting process
     time.sleep(2)
@@ -209,7 +209,6 @@ def run_trpo(hyperparams, shared_returns):
 
     sess.close()
     env.close()
-    #tf.reset_default_graph()
 
 # Function for logging relevant values to csv-file
 def log_function(env, batch_size, shared_returns, log_running): 
@@ -221,41 +220,38 @@ def log_function(env, batch_size, shared_returns, log_running):
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
     global ITERATION
+    rets = []
     
     old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
     time.sleep(5.0) # Process sleep for 5 seconds
-    ep = 1
-    prev_ep = 1
-    prev_step = 0
 
-    file = open((filename + str(ITERATION) + ".csv"), "w")
+    file = open((filename + str(ITERATION) + '.csv'), 'a')
 
-    file.write("Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n") # Header with names for all values logged
+    file.write('Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n') # Header with names for all values logged
     
     while log_running.value:
         # make a copy of the whole dict to avoid episode_returns and episodic_lengths getting desync
         copied_returns = copy.deepcopy(shared_returns)
 
         # Write current values to file
-        if len(shared_returns['episodic_returns']) != 0:
-            if ep - prev_ep == 1:
-                file.write(str(ep) + "," + str(env._episode_steps) + "," + str(copied_returns["rets"][-1]) + "," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) 
-                    + "," + str(env._x_target_[0]) + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]))
-        else:
-            if ep - prev_ep == 1:
-                file.write(str(ep) + "," + str(env._episode_steps) + ",NaN," + str(env._x_target_[2]) + "," + str(env._x_target_[1]) 
-                    + "," + str(env._x_target_[0]) + "," + str(env._x_[2]) + "," + str(env._x_[1]) + "," + str(env._x_[0]))
-        
-        if env._episode_steps - prev_step < 0:
-            ep += 1
-            prev_ep = ep
-            prev_step = env._episode_steps
-
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
-            returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
-            window_size_steps = 500
-            x_tick = 100
+            episode = len(copied_returns['episodic_lengths'])
+            copied_returns['mean_returns'] = rets
+
+            if len(rets):
+                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(rets[-1]) + 
+                            ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
+                            + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
+            else:
+                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + "NaN" + 
+                            ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
+                            + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
+
+        # Calculate rolling average of rewards
+            returns = np.array(copied_returns['episodic_returns'])
+            window_size_steps = 5000
+            x_tick = 1000
 
             if copied_returns['episodic_lengths']:
                 ep_lens = np.array(copied_returns['episodic_lengths'])
@@ -265,13 +261,14 @@ def log_function(env, batch_size, shared_returns, log_running):
 
             if cum_episode_lengths[-1] >= x_tick:
                 steps_show = np.arange(x_tick, cum_episode_lengths[-1] + 1, x_tick)
-                rets = []
 
                 for i in range(len(steps_show)):
                     rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
                         rets.append(np.mean(rets_in_window))
+    shared_returns['mean_returns'] = copied_returns['mean_returns']
+    file.close()
 
 if __name__ == '__main__':
     main()
