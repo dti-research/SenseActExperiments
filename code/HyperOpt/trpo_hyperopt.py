@@ -76,8 +76,7 @@ def main():
 		max_evals = max_evaluations, 
 		trials = bayes_trials)
     
-    
-    print(space) #debugging , delete
+    print(bayes_trials)
     print(best)
 
 
@@ -89,12 +88,10 @@ def objective(hyperparams):
     global ITERATION
     ITERATION += 1
 
-    # For logging rewards
-    returns = []
     shared_returns = Manager().dict({'write_lock': False,
                                      'episodic_returns': [],
                                      'episodic_lengths': [],
-                                     'rets': []}) # A manager dictionary object containing `episodic returns` and `episodic lengths`
+                                     'mean_returns': []}) # A manager dictionary object containing `episodic returns` and `episodic lengths`
 
     # Get all the current hyperparameter values
     hid_size = hyperparams['num_hid_layers'].get('hid_size') # Need to retrieve like this, because it is nested in dictionary
@@ -114,13 +111,12 @@ def objective(hyperparams):
     pp2.join()
 
     copied_returns = copy.deepcopy(shared_returns)
-    returns = copied_returns['episodic_returns']
 
     # Extract the highest reward
-    best_score = max(returns)
+    best_score = max(copied_returns['mean_returns'])
 
     # Transform to loss, to obtain a function to minimize
-    loss = 1 - best_score
+    loss = - best_score
 
     # Log the current hyperparameter setting, iteration and loss in a csv-file
     file = open(hp_filename, 'a')
@@ -183,7 +179,7 @@ def run_trpo(hyperparams, shared_returns):
                         )
 
     # Create and start logging process
-    log_running = Value('i', 1) # flag
+    log_running = Value('i', 1) 
 
     # Spawn logging process
     pp = Process(target=log_function, args=(env, hyperparams['timesteps_per_batch'], shared_returns, log_running)) 
@@ -194,7 +190,7 @@ def run_trpo(hyperparams, shared_returns):
 
     # Train baselines TRPO
     learn(env, policy_fn,
-          max_timesteps=15000,
+          max_timesteps=150000,
           timesteps_per_batch=hyperparams['timesteps_per_batch'],
           max_kl=hyperparams['max_kl'],
           cg_iters=10,
@@ -224,6 +220,7 @@ def log_function(env, batch_size, shared_returns, log_running):
         log_running: A multiprocessing Value object containing 0/1 - a flag to allow logging while process is running
     """
     global ITERATION
+    rets = []
     
     old_size = len(shared_returns['episodic_returns']) # Initialize variable old_size with the lenght of mystical array episodic_returns from helper.py
     time.sleep(5.0) # Process sleep for 5 seconds
@@ -240,10 +237,16 @@ def log_function(env, batch_size, shared_returns, log_running):
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
             old_size = len(copied_returns['episodic_returns'])
             episode = len(copied_returns['episodic_lengths'])
+            copied_returns['mean_returns'] = rets
 
-            file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(copied_returns['episodic_returns'][-1]) + 
-                        ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
-                        + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
+            if len(rets):
+                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(rets[-1]) + 
+                            ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
+                            + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
+            else:
+                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + "NaN" + 
+                            ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
+                            + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
 
         # Calculate rolling average of rewards
             returns = np.array(copied_returns['episodic_returns'])
@@ -258,14 +261,13 @@ def log_function(env, batch_size, shared_returns, log_running):
 
             if cum_episode_lengths[-1] >= x_tick:
                 steps_show = np.arange(x_tick, cum_episode_lengths[-1] + 1, x_tick)
-                rets = []
 
                 for i in range(len(steps_show)):
                     rets_in_window = returns[(cum_episode_lengths > max(0, x_tick * (i + 1) - window_size_steps)) *
                                              (cum_episode_lengths < x_tick * (i + 1))]
                     if rets_in_window.any():
                         rets.append(np.mean(rets_in_window))
-        
+    shared_returns['mean_returns'] = copied_returns['mean_returns']
     file.close()
 
 if __name__ == '__main__':
