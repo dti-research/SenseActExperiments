@@ -22,23 +22,45 @@ from senseact.utils import tf_set_seeds, NormalizedEnv
 from helper import create_callback
 from ur_setups import setup
 
-# Directory for evaluation logs
 parser = argparse.ArgumentParser(description='Benchmarking DRL on Real World Robots')
-parser.add_argument('--log_dir', type=str, default='../../logs/TRPO',
+parser.add_argument('--max_timesteps', type=int, default=150000,
+                    help='number of timesteps used in the learning phase (default: 150000)')
+parser.add_argument('--hid_size', type=int, default=64,
+                    help='size of hidden layers (default: 64)')
+parser.add_argument('--num_hid_layers', type=int, default=2,
+                    help='number of hidden layers (default: 2)')
+parser.add_argument('--batch_size', type=int, default=4096,
+                    help='input batch size for training (default: 4096)')
+parser.add_argument('--vf_stepsize', type=float, default=0.00472,
+                    help='stepsize (default: 0.00472)')
+parser.add_argument('--max_kl', type=float, default=0.02437,
+                    help='max_kl (default: 0.02437)')
+parser.add_argument('--gamma', type=float, default=0.96833,
+                    help='gamma (default: 0.96833)')
+parser.add_argument('--lamda', type=float, default=0.99874,
+                    help='lamda (default: 0.99874)')
+parser.add_argument('--log_dir', type=str, default="../../logs/TRPO",
                     help='path to put log files')
 args = parser.parse_args()
 
 def main():
     # Set hyperparameters here
-    hid_size = 32
-    num_hid_layers = 2
-    timesteps_per_batch = 2048
-    vf_stepsize = 0.001
-    max_kl = 0.05
-    cg_iters = 10
+    max_timesteps       = args.max_timesteps
+    hid_size            = args.hid_size
+    num_hid_layers      = args.num_hid_layers
+    timesteps_per_batch = args.timesteps_per_batch
+    vf_stepsize         = args.vf_stepsize
+    max_kl              = args.max_kl
+    gamma               = args.gamma
+    lam                 = args.lamda
+
+    # WARNING: Hardcoded values from Kindred's example with no explanation.
+    #  https://github.com/kindredresearch/SenseAct/blob/master/examples/advanced/ur5_reacher.py#L78
+    #  - No explanation found in paper.
+    #  - No explanation from Kindred by mail correspondance.
+    vf_iters   = 5
+    cg_iters   = 10
     cg_damping = 0.1
-    gamma = 0.995
-    lam = 0.995
     
     # Use fixed random state
     rand_state = np.random.RandomState(1).get_state()
@@ -98,12 +120,12 @@ def main():
 
     # Train baselines TRPO
     learn(env, policy_fn,
-          max_timesteps=4096,
+          max_timesteps=max_timesteps,
           timesteps_per_batch=timesteps_per_batch,
           max_kl=max_kl,
           cg_iters=cg_iters,
           cg_damping=cg_damping,
-          vf_iters=5,
+          vf_iters=vf_iters,
           vf_stepsize=vf_stepsize,
           gamma=gamma,
           lam=lam,
