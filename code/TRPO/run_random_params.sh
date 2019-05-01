@@ -1,8 +1,15 @@
 #!/bin/bash
 
+# Copyright (c) 2019, Danish Technological Institute.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 # From: Benchmarking Reinforcement Learning Algorithms on Real-World Robots
 #           https://arxiv.org/pdf/1809.07731.pdf
 #           Tab. A7: All hyper-parameter configurations, their value distributions and correlations with returns
+#           All values are drawn random (uniform distribution) from the parameter ranges in Tab. A3.
 #
 # Average batch   vf-step-    δKL         γ           λ           hidden  hidden
 # Return  size    size                                            layers  sizes
@@ -46,17 +53,31 @@ max_kl=(0.02437 0.01909 0.31222 0.01952 0.00510 0.01659 0.21515 0.09138 0.06088 
 gamma=(0.96833 0.99924 0.97433 0.99799 0.96801 0.99935 0.99891 0.99677 0.98488 0.99414 0.99813 0.99728 0.97415 0.99945 0.98544 0.99750 0.99516 0.99119 0.97334 0.99430 0.95963 0.99447 0.99686 0.99926 0.99948 0.96836 0.99260 0.98940 0.99402 0.99961)
 lamda=(0.99874 0.99003 0.99647 0.92958 0.96893 0.99711 0.99880 0.99959 0.99957 0.98684 0.99964 0.99420 0.99759 0.99961 0.98067 0.98955 0.99867 0.98400 0.98524 0.99781 0.99950 0.99951 0.93165 0.98226 0.99204 0.99944 0.98021 0.97090 0.90185 0.99877)
 
-for i in {0..29}
+for i in {0..29} # number of configurations to run
 do
-    echo "Running test #$i"
-    echo ${hid_size[$i]} ${num_hid_layers[$i]} ${batch_size[$i]} ${vf_stepsize[$i]} ${max_kl[$i]} ${gamma[$i]} ${lamda[$i]}
-    
-    python example.py \
-           --hid_size=${hid_size[$i]} \
-           --num_hid_layers=${num_hid_layers[$i]} \
-           --batch_size=${batch_size[$i]} \
-           --vf_stepsize=${vf_stepsize[$i]} \
-           --max_kl=${max_kl[$i]} \
-           --gamma=${gamma[$i]} \
-           --lamda=${lamda[$i]}
+    echo "***********************************"
+    echo "* Hyperparameter Configuration #$i"
+    echo "* - Hidden sizes: ${hid_size[$i]}"
+    echo "* - Num. hid. layers: ${num_hid_layers[$i]}"
+    echo "* - Batch size: ${batch_size[$i]}"
+    echo "* - VF stepsize: ${vf_stepsize[$i]}"
+    echo "* - Max KL: ${max_kl[$i]}"
+    echo "* - Gamma: ${gamma[$i]}"
+    echo "* - Lamda: ${lamda[$i]}"
+    echo "***********************************"
+
+    for j in {0..9} # number of tests for each hyperparameter configuration
+    do
+        echo " - Running test #$j for hyperparameter configuration #$i"
+        
+        python ur5_reacher.py \
+            --hid_size=${hid_size[$i]} \
+            --num_hid_layers=${num_hid_layers[$i]} \
+            --batch_size=${batch_size[$i]} \
+            --vf_stepsize=${vf_stepsize[$i]} \
+            --max_kl=${max_kl[$i]} \
+            --gamma=${gamma[$i]} \
+            --lamda=${lamda[$i]} \
+            --log_dir=../../logs/TRPO/RandomConf/$i
+    done
 done
