@@ -4,6 +4,3 @@ __pycache__
 *.pyc
 senseact/lib/
 senseact.egg-info/
-
-# tmp for test:
-logs/

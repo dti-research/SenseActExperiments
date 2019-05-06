@@ -1,0 +1,51 @@
+global:
+  seed: 
+environment:
+  class: ReacherEnv
+  module: senseact.envs.ur.reacher_env 
+  setup_file_path: ../setups/ur5_setup.py
+  parameters:
+    host: null
+    dof: 2
+    control_type: velocity
+    target_type: position
+    reset_type: zero
+    reward_type: precision
+    derivative_type: none
+    deriv_action_max: 5
+    first_deriv_max: 2
+    accel_max: 1.4
+    speed_max: 0.3
+    speedj_a: 1.4
+    episode_length_time: 4.0
+    episode_length_step: null
+    actuation_sync_period: 1
+    dt: 0.04
+    run_mode: multiprocess
+    rllab_box: False
+    movej_t: 2.0
+    delay: 0.0
+algorithm:
+  class: learn
+  module: baselines.trpo_mpi.trpo_mpi
+  parameters:
+    max_timesteps: 150000
+    hid_size: 64
+    num_hid_layers: 2
+    timesteps_per_batch: 4096
+    vf_stepsize: 0.00472
+    max_kl: 0.02437
+    gamma: 0.96833
+    lam: 0.99874
+    # WARNING: Hardcoded values from Kindreds example with no explanation.
+    #  https://github.com/kindredresearch/SenseAct/blob/master/examples/advanced/ur5_reacher.py#L78
+    #  - No explanation found in paper.
+    #  - No explanation from Kindred by mail correspondance.
+    vf_iters: 5
+    cg_iters: 10
+    cg_damping: 0.1
+model:
+  class: MlpPolicy
+  module: baselines.ppo1.mlp_policy
+train:
+  artifacts_path: ../artifacts/logs/trpo/
