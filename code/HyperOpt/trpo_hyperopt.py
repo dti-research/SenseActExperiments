@@ -52,8 +52,8 @@ space = {
         'timesteps_per_batch': hp.choice('timesteps_per_batch', [256, 512, 1024, 2048, 4096, 8192]),
         'vf_stepsize': hp.loguniform('vf_stepsize', -5, -2),
         'max_kl' : hp.loguniform('max_kl', -2.5, -0.5),
-        'gamma': hp.uniform('gamma', (1-(1/((0.1)*4))), (1-(1/((31.62)*4)))), #4:T. Remember to change this if code is altered. -1:T/tau. tau=0.04=dt
-        'lam': hp.uniform('lam', (1-(1/((0.1)*4))), (1-(1/((31.62)*4)))) #4:T. Remember to change this if code is altered. -1:T/tau. tau=0.04=dt
+        'gamma': hp.uniform('gamma', (1-(1/((10**(-1))*4))), (1-(1/((10**(1.5))*4)))), #4:T. Remember to change this if code is altered. -1:T/tau. tau=0.04=dt
+        'lam': hp.uniform('lam', (1-(1/((10**(-1))*4))), (1-(1/((10**(1.5))*4)))) #4:T. Remember to change this if code is altered. -1:T/tau. tau=0.04=dt
 }
 
 def main():
@@ -237,7 +237,7 @@ def log_function(env, batch_size, shared_returns, log_running):
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
             old_size = len(copied_returns['episodic_returns'])
             episode = len(copied_returns['episodic_lengths'])
-            copied_returns['mean_returns'] = rets
+            shared_returns['mean_returns'] = rets
 
             if len(rets):
                 file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(rets[-1]) + 
