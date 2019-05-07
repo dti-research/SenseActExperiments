@@ -1,0 +1,58 @@
+global:
+  seed: 
+environment:
+  class: get_env
+  module: ../environments/ur
+  codebase:
+    class: ReacherEnv
+    module: senseact.envs.ur.reacher_env 
+  setup:
+    class: setup
+    module: ../utils/ur5_setup
+  parameters:
+    host: null
+    dof: 2
+    control_type: velocity
+    target_type: position
+    reset_type: zero
+    reward_type: precision
+    derivative_type: none
+    deriv_action_max: 5
+    first_deriv_max: 2
+    accel_max: 1.4
+    speed_max: 0.3
+    speedj_a: 1.4
+    episode_length_time: 4.0
+    episode_length_step: null
+    actuation_sync_period: 1
+    dt: 0.04
+    run_mode: multiprocess
+    rllab_box: False
+    movej_t: 2.0
+    delay: 0.0
+algorithm:
+  class: train
+  module: ../algorithms/ppo
+  codebase:
+    class: learn
+    module: baselines.ppo1.pposgd_simple
+  hyperparameters:
+    max_timesteps: 150000
+    hid_size: 64
+    num_hid_layers: 2
+    # WARNING: Hardcoded values from Kindreds example with no explanation.
+    clip_param:
+    entcoeff: 
+    gamma:
+    lam:
+    timesteps_per_actorbatch:
+    optim_batchsize:
+    optim_epochs:
+    optim_stepsize:
+    adam_epsilon: 1e-5,
+    schedule: constant
+model:
+  class: MlpPolicy
+  module: baselines.ppo1.mlp_policy
+train:
+  artifacts_path: ../artifacts/logs/ppo/
