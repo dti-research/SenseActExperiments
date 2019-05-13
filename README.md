@@ -1,4 +1,4 @@
-# Eval-DRL
+# SenseActExperiments
 An Evaluation of Deep Reinforcement Learning Baseline Algorithms on Real-World Robots
 
 ## Folder structure
