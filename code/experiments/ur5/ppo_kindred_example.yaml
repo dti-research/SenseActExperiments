@@ -2,13 +2,13 @@ global:
   seed: 
 environment:
   class: get_env
-  module: ../environments/ur
+  module: ../../environments/ur
   codebase:
     class: ReacherEnv
     module: senseact.envs.ur.reacher_env 
   setup:
     class: setup
-    module: ../utils/ur5_setup
+    module: ../../utils/ur5_setup
   parameters:
     host: null
     dof: 2
@@ -32,27 +32,28 @@ environment:
     delay: 0.0
 algorithm:
   class: train
-  module: ../algorithms/ppo
+  module: ../../algorithms/ppo
   codebase:
     class: learn
     module: baselines.ppo1.pposgd_simple
   hyperparameters:
     max_timesteps: 150000
     hid_size: 64
-    num_hid_layers: 2
-    # WARNING: Hardcoded values from Kindreds example with no explanation.
-    clip_param:
-    entcoeff: 
-    gamma:
-    lam:
-    timesteps_per_actorbatch:
-    optim_batchsize:
-    optim_epochs:
-    optim_stepsize:
-    adam_epsilon: 1e-5,
+    num_hid_layers: 3
+    batch_size: 512 # timesteps_per_actorbatch ??
+    gamma: 0.96836
+    lam: 0.99944
+    optim_batchsize: 16
+    optim_epochs: null
+    optim_stepsize: 0.00005
+    # WARNING: Hardcoded values from Kindreds experiments.
+    #          Recieved via mail correspondance
+    clip_param: 0.2
+    entcoeff: 0.0
+    adam_epsilon: 1e-5
     schedule: constant
 model:
   class: MlpPolicy
   module: baselines.ppo1.mlp_policy
 train:
-  artifacts_path: ../artifacts/logs/ppo/
+  artifacts_path: ../../artifacts/logs/ppo/

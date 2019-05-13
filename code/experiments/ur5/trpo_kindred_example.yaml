@@ -2,13 +2,13 @@ global:
   seed: 
 environment:
   class: get_env
-  module: ../environments/ur
+  module: ../../environments/ur
   codebase:
     class: ReacherEnv
     module: senseact.envs.ur.reacher_env 
   setup:
     class: setup
-    module: ../utils/ur5_setup
+    module: ../../utils/ur5_setup
   parameters:
     host: null
     dof: 2
@@ -32,7 +32,7 @@ environment:
     delay: 0.0
 algorithm:
   class: train
-  module: ../algorithms/trpo
+  module: ../../algorithms/trpo
   codebase:
     class: learn
     module: baselines.trpo_mpi.trpo_mpi
@@ -56,4 +56,4 @@ model:
   class: MlpPolicy
   module: baselines.ppo1.mlp_policy
 train:
-  artifacts_path: ../artifacts/logs/trpo/
+  artifacts_path: ../../artifacts/logs/trpo/
