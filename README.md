@@ -3,7 +3,7 @@ A Survey on Reproducibility and Measurement Metrics by Evaluating Deep Reinforce
 
 ## TL;DR, Show me how to run it!
 
-To run the experiments you need to have a working install of Docker prior to proceeding.
+To run the experiments you need to have a working install of [Docker](https://docs.docker.com/) prior to proceeding.
 
 
 1. On the host machine do:
