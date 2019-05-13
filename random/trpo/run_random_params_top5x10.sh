@@ -8,8 +8,12 @@
 
 # From: Benchmarking Reinforcement Learning Algorithms on Real-World Robots
 #           https://arxiv.org/pdf/1809.07731.pdf
-#           Tab. A7: All hyper-parameter configurations, their value distributions and correlations with returns
-#           All values are drawn random (uniform distribution) from the parameter ranges in Tab. A3.
+#
+#           App. A7, Tab. 1: All hyper-parameter configurations for TRPO,
+#           their value distributions and correlations with returns
+#           
+#           All values are drawn random (uniform distribution) from the
+#           parameter ranges in App. A3.
 #
 # Average batch   vf-step-    δKL         γ           λ           hidden  hidden
 # Return  size    size                                            layers  sizes

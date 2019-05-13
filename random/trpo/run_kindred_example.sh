@@ -20,4 +20,4 @@ python ur5_reacher.py \
     --max_kl=0.05 \
     --gamma=0.995 \
     --lamda=0.995 \
-    --log_dir=../../logs/TRPO/KindredExample
+    --log_dir=logs/TRPO/KindredExample
