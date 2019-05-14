@@ -13,9 +13,9 @@ import logging
 import imp
 import importlib
 
-import baselines.common.tf_util as U
 from multiprocessing import Process, Value, Manager
-from senseact.utils import tf_set_seeds, NormalizedEnv
+
+from helper import create_callback
 
 l = imp.find_module('../utils/logger')
 l = imp.load_module('../utils/logger', *l)
@@ -27,6 +27,8 @@ def train(cfg):
     Args:
         cfg (dict): Configuration parameters loaded into dict from yaml file
     """
+
+    artifacts_path = cfg['train']['artifacts_path']
     
     # Get environment
     m = cfg['environment']['module']
@@ -47,7 +49,7 @@ def train(cfg):
                        cfg['algorithm']['hyperparameters']['timesteps_per_batch'],
                        shared_returns,
                        log_running,
-                       artifact_path
+                       artifacts_path
                        )
                 )
     pp.start()

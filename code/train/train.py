@@ -75,9 +75,9 @@ if __name__ == '__main__':
     logging.debug(yaml.dump(cfg, default_flow_style=False))
 
     # Load artifact path
-    artifact_path = cfg['train']['artifacts_path']
-    logging.debug(artifact_path)
-    if not os.path.exists(artifact_path): os.makedirs(artifact_path)
+    artifacts_path = cfg['train']['artifacts_path']
+    logging.debug(artifacts_path)
+    if not os.path.exists(artifacts_path): os.makedirs(artifacts_path)
 
     # Load train script
     m = cfg['algorithm']['module']

@@ -7,9 +7,10 @@
 import logging
 import imp
 import importlib
-
 import numpy as np
-from senseact.utils import tf_set_seeds
+
+import baselines.common.tf_util as U
+from senseact.utils import tf_set_seeds, NormalizedEnv
 
 def get_env(cfg):
     # Use fixed random state
@@ -68,7 +69,7 @@ def get_env(cfg):
         return policy_fn_class(name           = name,
                                ob_space       = ob_space,
                                ac_space       = ac_space,
-                               hid_size       = cfg['algorithm']['parameters']['hid_size'],
-                               num_hid_layers = cfg['algorithm']['parameters']['num_hid_layers'])
+                               hid_size       = cfg['algorithm']['hyperparameters']['hid_size'],
+                               num_hid_layers = cfg['algorithm']['hyperparameters']['num_hid_layers'])
     
     return env, policy_fn
