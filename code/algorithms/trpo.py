@@ -17,8 +17,8 @@ from multiprocessing import Process, Value, Manager
 
 from helper import create_callback
 
-l = imp.find_module('../utils/logger')
-l = imp.load_module('../utils/logger', *l)
+l = imp.find_module('utils/logger')
+l = imp.load_module('utils/logger', *l)
 log_function = getattr(l, 'log_function')
 
 def train(cfg):
