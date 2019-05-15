@@ -10,7 +10,7 @@ import os
 import io
 import logging
 import sys
-import yaml
+import ruamel.yaml as yaml
 import imp
 import importlib
 import argparse
@@ -42,7 +42,7 @@ def load_cfg(yaml_filepath):
     """
     # Read YAML experiment definition file
     with open(yaml_filepath, 'r') as stream:
-        cfg = yaml.load(stream, Loader=yaml.FullLoader)
+        cfg = yaml.load(stream, Loader=yaml.Loader)
     cfg = make_paths_absolute(os.path.dirname(yaml_filepath), cfg)
     return cfg
 
@@ -75,9 +75,9 @@ if __name__ == '__main__':
     logging.debug(yaml.dump(cfg, default_flow_style=False))
 
     # Load artifact path
-    artifacts_path = cfg['train']['artifacts_path']
-    logging.debug(artifacts_path)
-    if not os.path.exists(artifacts_path): os.makedirs(artifacts_path)
+    artifact_path = cfg['train']['artifact_path']
+    logging.debug(artifact_path)
+    if not os.path.exists(artifact_path): os.makedirs(artifact_path)
 
     # Load train script
     m = cfg['algorithm']['module']

@@ -13,12 +13,12 @@ import logging
 import imp
 import importlib
 
-import baselines.common.tf_util as U
 from multiprocessing import Process, Value, Manager
-from senseact.utils import NormalizedEnv
 
-l = imp.find_module('../utils/logger')
-l = imp.load_module('../utils/logger', *l)
+from helper import create_callback
+
+l = imp.find_module('utils/logger')
+l = imp.load_module('utils/logger', *l)
 log_function = getattr(l, 'log_function')
 
 def train(cfg):
@@ -27,6 +27,8 @@ def train(cfg):
     Args:
         cfg (dict): Configuration parameters loaded into dict from yaml file
     """
+
+    artifact_path = cfg['train']['artifact_path']
     
     # Get environment
     m = cfg['environment']['module']
@@ -44,7 +46,7 @@ def train(cfg):
     # Spawn logging process
     pp = Process(target=log_function,
                  args=(env,
-                       cfg['algorithm']['hyperparameters']['timesteps_per_actorbatch'],
+                       cfg['algorithm']['hyperparameters']['batch_size'],
                        shared_returns,
                        log_running,
                        artifact_path
@@ -59,10 +61,11 @@ def train(cfg):
     m = importlib.import_module(cfg['algorithm']['codebase']['module'])
     learn = getattr(m, cfg['algorithm']['codebase']['class'])
     logging.debug(learn)
+    logging.debug(type(cfg['algorithm']['hyperparameters']['adam_epsilon']))
 
     learn(env, policy_fn,
           max_timesteps            = cfg['algorithm']['hyperparameters']['max_timesteps'],
-          timesteps_per_actorbatch = cfg['algorithm']['hyperparameters']['timesteps_per_actorbatch'],
+          timesteps_per_actorbatch = cfg['algorithm']['hyperparameters']['batch_size'],
           clip_param               = cfg['algorithm']['hyperparameters']['clip_param'],
           entcoeff                 = cfg['algorithm']['hyperparameters']['entcoeff'], 
           optim_batchsize          = cfg['algorithm']['hyperparameters']['optim_batchsize'],

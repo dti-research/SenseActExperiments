@@ -28,7 +28,7 @@ def train(cfg):
         cfg (dict): Configuration parameters loaded into dict from yaml file
     """
 
-    artifacts_path = cfg['train']['artifacts_path']
+    artifact_path = cfg['train']['artifact_path']
     
     # Get environment
     m = cfg['environment']['module']
@@ -49,7 +49,7 @@ def train(cfg):
                        cfg['algorithm']['hyperparameters']['timesteps_per_batch'],
                        shared_returns,
                        log_running,
-                       artifacts_path
+                       artifact_path
                        )
                 )
     pp.start()
