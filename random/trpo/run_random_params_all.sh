@@ -74,7 +74,7 @@ do
     do
         echo " - Running test #$j for hyperparameter configuration #$i"
         
-        python ur5_reacher.py \
+        python3 ur5_reacher.py \
             --hid_size=${hid_size[$i]} \
             --num_hid_layers=${num_hid_layers[$i]} \
             --batch_size=${batch_size[$i]} \

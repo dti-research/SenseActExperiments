@@ -12,7 +12,7 @@
 #    WARNING:   These parameters are not documented nor guaranteed to converge to any form for useful solution!
 #
 
-python ur5_reacher.py \
+python3 ur5_reacher.py \
     --hid_size=32 \
     --num_hid_layers=2 \
     --batch_size=2048 \

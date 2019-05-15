@@ -48,7 +48,7 @@ def main():
     max_timesteps       = args.max_timesteps
     hid_size            = args.hid_size
     num_hid_layers      = args.num_hid_layers
-    timesteps_per_batch = args.timesteps_per_batch
+    timesteps_per_batch = args.batch_size
     vf_stepsize         = args.vf_stepsize
     max_kl              = args.max_kl
     gamma               = args.gamma
