@@ -1,0 +1,59 @@
+algorithm:
+  class: train
+  codebase:
+    class: learn
+    module: baselines.ppo1.pposgd_simple
+  hyperparameters:
+    adam_epsilon: 1e-05
+    batch_size: 512
+    clip_param: 0.2
+    entcoeff: 0.0
+    gamma: 0.99402
+    hid_size: 2048
+    lam: 0.90185
+    max_timesteps: 150000
+    num_hid_layers: 1
+    optim_batchsize: 8
+    optim_epochs: 10
+    optim_stepsize: 0.00011
+    schedule: constant
+  module: algorithms/ppo
+environment:
+  class: get_env
+  codebase:
+    class: ReacherEnv
+    module: senseact.envs.ur.reacher_env
+  module: environments/ur
+  parameters:
+    accel_max: 1.4
+    actuation_sync_period: 1
+    control_type: velocity
+    delay: 0.0
+    deriv_action_max: 5
+    derivative_type: none
+    dof: 2
+    dt: 0.04
+    episode_length_step: null
+    episode_length_time: 4.0
+    first_deriv_max: 2
+    host: null
+    movej_t: 2.0
+    reset_type: zero
+    reward_type: precision
+    rllab_box: false
+    run_mode: multiprocess
+    speed_max: 0.3
+    speedj_a: 1.4
+    target_type: position
+  setup:
+    class: setup
+    module: utils/ur5_setup
+global:
+  seed:
+    high: null
+    low: null
+model:
+  class: MlpPolicy
+  module: baselines.ppo1.mlp_policy
+train:
+  artifact_path: artifacts/logs/ppo/2
