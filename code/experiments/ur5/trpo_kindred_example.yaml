@@ -2,13 +2,13 @@ global:
   seed: 
 environment:
   class: get_env
-  module: ../environments/ur
+  module: environments/ur
   codebase:
     class: ReacherEnv
-    module: senseact.envs.ur.reacher_env 
+    module: senseact.envs.ur.reacher_env
   setup:
     class: setup
-    module: ../utils/ur5_setup
+    module: utils/ur5_setup
   parameters:
     host: null
     dof: 2
@@ -32,7 +32,7 @@ environment:
     delay: 0.0
 algorithm:
   class: train
-  module: ../algorithms/trpo
+  module: algorithms/trpo
   codebase:
     class: learn
     module: baselines.trpo_mpi.trpo_mpi
@@ -45,7 +45,7 @@ algorithm:
     max_kl: 0.02437
     gamma: 0.96833
     lam: 0.99874
-    # WARNING: Hardcoded values from Kindreds example with no explanation.
+    # WARNING: Hardcoded values from Kindreds example.
     #  https://github.com/kindredresearch/SenseAct/blob/master/examples/advanced/ur5_reacher.py#L78
     #  - No explanation found in paper.
     #  - No explanation from Kindred by mail correspondance.

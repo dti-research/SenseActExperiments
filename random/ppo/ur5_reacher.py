@@ -121,9 +121,9 @@ def main():
           timesteps_per_actorbatch=batch_size,
           clip_param=clip_param,
           entcoeff=entcoeef,
-          optim_epochs=, ####################################### <-- ??
+          optim_epochs=10,
           optim_stepsize=step_size,
-          optim_batchsize=, #################################### <-- ??
+          optim_batchsize=opt_batch_size,
           gamma=gamma
           lam=lam
           max_timesteps=max_timesteps,
