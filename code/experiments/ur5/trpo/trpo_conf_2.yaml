@@ -4,17 +4,20 @@ algorithm:
     class: learn
     module: baselines.trpo_mpi.trpo_mpi
   hyperparameters:
+    batch_size: 8192
     cg_damping: 0.1
     cg_iters: 10
     gamma: 0.97433
     hid_size: 64
     lam: 0.99647
-    max_kl: 0.31222
+    max_kl: 0.02437
     max_timesteps: 150000
     num_hid_layers: 4
-    timesteps_per_batch: 8192
+    optim_batchsize: null
+    optim_stepsize: null
+    timesteps_per_batch: 4096
     vf_iters: 5
-    vf_stepsize: 0.00037
+    vf_stepsize: 0.00472
   module: algorithms/trpo
 environment:
   class: get_env
@@ -54,4 +57,4 @@ model:
   class: MlpPolicy
   module: baselines.ppo1.mlp_policy
 train:
-  artifact_path: artifacts/logs/trpo/
+  artifact_path: artifacts/logs/trpo/2

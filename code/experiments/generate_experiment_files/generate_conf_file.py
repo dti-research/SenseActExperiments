@@ -51,6 +51,8 @@ parser.add_argument('--output_filename', type=str, default=None,
                     help='Experiment output filename')
 parser.add_argument('--output_dir', type=str, default=None,
                     help='path to put experiment files')
+parser.add_argument('--log_dir', type=str, default=None,
+                    help='path to put log files')
 args = parser.parse_args()
 
 def set_trpo_hyperparameters(cfg):
@@ -118,6 +120,8 @@ if __name__ == '__main__':
 
     cfg['global']['seed']['high'] = args.seed_high if not None else None
     cfg['global']['seed']['low'] = args.seed_low if not None else None
+
+    cfg['train']['artifact_path'] = args.log_dir
 
     # Set TRPO specific hyper-parameters
     #cfg = set_trpo_hyperparameters(cfg)

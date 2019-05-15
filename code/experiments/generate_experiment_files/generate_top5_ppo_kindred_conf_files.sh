@@ -86,5 +86,6 @@ do
             --gamma=${gamma[$i]} \
             --lamda=${lamda[$i]} \
             --output_filename=ppo_conf_$i.yaml \
-            --output_dir=../ur5/ppo/
+            --output_dir=../ur5/ppo/\
+            --log_dir=artifacts/logs/ppo/$i
 done

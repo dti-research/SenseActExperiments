@@ -86,5 +86,6 @@ do
             --gamma=${gamma[$i]} \
             --lamda=${lamda[$i]} \
             --output_filename=trpo_conf_$i.yaml \
-            --output_dir=../ur5/trpo/
+            --output_dir=../ur5/trpo/ \
+            --log_dir=artifacts/logs/trpo/$i
 done

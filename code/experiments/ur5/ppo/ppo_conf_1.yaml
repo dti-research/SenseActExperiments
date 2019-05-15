@@ -56,4 +56,4 @@ model:
   class: MlpPolicy
   module: baselines.ppo1.mlp_policy
 train:
-  artifact_path: artifacts/logs/ppo/
+  artifact_path: artifacts/logs/ppo/1
