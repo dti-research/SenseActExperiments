@@ -8,6 +8,13 @@ import time
 import copy
 import numpy as np
 import os
+import logging
+import sys
+
+# Setup logging
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
+                    level=logging.DEBUG,
+                    stream=sys.stdout)
 
 def log_function(env, batch_size, shared_returns, log_running, log_dir): 
     """ Process for logging all data generated during runtime.
@@ -20,13 +27,16 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
 
     old_size = len(shared_returns['episodic_returns']) 
     time.sleep(5.0)
+    logging.debug('Started logging process')
     rets = []
 
     # Create logs directory
     if not os.path.exists(log_dir): os.makedirs(log_dir)
 
     time_now = time.time()
-    file = open(os.path.join(os.path.join(log_dir, str(time_now)+'.csv')), 'a')
+    csv_file_path = os.path.join(log_dir, str(time_now)+'.csv')
+    file = open(csv_file_path, 'a')
+    logging.debug('Logging results to: ' + csv_file_path)
 
     file.write('Episode,Step,Reward,X-Target,Y-Target,Z-Target,X-Current,Y-Current,Z-Current \n') # Header with names for all values logged
 
@@ -37,18 +47,20 @@ def log_function(env, batch_size, shared_returns, log_running, log_dir):
 
         # Write current values to file
         if not copied_returns['write_lock'] and  len(copied_returns['episodic_returns']) > old_size:
+            logging.debug('Writing to log file.')
             returns = np.array(copied_returns['episodic_returns'])
             old_size = len(copied_returns['episodic_returns'])
 
-            if len(rets):
-                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + str(rets[-1]) + 
-                           ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
-                           + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
-            else:
-                file.write(str(episode) + ',' + str(int(episode*100)) + ',' + 'NaN' + 
-                           ',' + str(env._x_target_[2]) + ',' + str(env._x_target_[1])  + ',' + str(env._x_target_[0])
-                           + ',' + str(env._x_[2]) + ',' + str(env._x_[1]) + ',' + str(env._x_[0]) + '\n')
-            
+            file.write(str(episode) + ',' +
+                       str(int(episode*100)) + ',' +
+                       (str(rets[-1]) if len(rets) else 'NaN') + ',' +
+                       str(env._x_target_[2]) + ',' + 
+                       str(env._x_target_[1]) + ',' + 
+                       str(env._x_target_[0]) + ',' + 
+                       str(env._x_[2]) + ',' + 
+                       str(env._x_[1]) + ',' + 
+                       str(env._x_[0]) + '\n')
+
             # Calculate rolling average of rewards
             window_size_steps = 5000
             x_tick = 1000
