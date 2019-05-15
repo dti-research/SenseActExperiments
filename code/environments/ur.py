@@ -13,10 +13,16 @@ import baselines.common.tf_util as U
 from senseact.utils import tf_set_seeds, NormalizedEnv
 
 def get_env(cfg):
-    # Use fixed random state
-    rand_state = np.random.RandomState(1).get_state()
-    np.random.set_state(rand_state)
-    tf_set_seeds(np.random.randint(1, 2**31 - 1))
+    # Set seed to potentially fix random state
+    seed_low  = cfg['global']['seed']['low'] 
+    seed_high = cfg['global']['seed']['high']
+    if seed_low is not None:
+        logging.debug('Using seed [{},{}) "half-open" interval'.format(seed_low, seed_high))
+        rand_state = np.random.RandomState(seed_low).get_state()
+        np.random.set_state(rand_state)
+        tf_set_seeds(np.random.randint(seed_low, seed_high))
+    else:
+        logging.debug('Not using any seeds!')
 
     # Load the RL Environment
     env_module = importlib.import_module(cfg['environment']['codebase']['module'])
@@ -51,7 +57,7 @@ def get_env(cfg):
             rllab_box             = cfg['environment']['parameters']['rllab_box'],
             movej_t               = cfg['environment']['parameters']['movej_t'],
             delay                 = cfg['environment']['parameters']['delay'],
-            random_state          = rand_state
+            random_state          = rand_state if seed_low else None
         )
     env = NormalizedEnv(env)
 

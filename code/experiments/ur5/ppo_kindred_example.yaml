@@ -1,5 +1,7 @@
 global:
-  seed: 
+  seed:
+    low: null #1
+    high: null #!!python/object/apply:eval [ 2**31 - 1 ]
 environment:
   class: get_env
   module: environments/ur
