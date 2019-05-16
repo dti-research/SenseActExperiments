@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(description='Benchmarking DRL on Real-World Rob
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-f", "--file",
                     dest="filename",
-                    help="experiment definition file",
+                    help="experiment configuration file",
                     metavar="FILE",
                     required=True)
 args = parser.parse_args()

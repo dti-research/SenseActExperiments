@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import logging
-import imp
+#import imp
 import importlib
 import numpy as np
 
@@ -29,14 +29,14 @@ def get_env(cfg):
     env_class = getattr(env_module, cfg['environment']['codebase']['class'])
     logging.debug(env_class)
 
-    # Load setup file
-    s = imp.find_module(cfg['environment']['setup']['module'])
-    s = imp.load_module(cfg['environment']['setup']['module'], *s)
-    setup = getattr(s, cfg['environment']['setup']['class'])
+    ## Load setup file
+    #s = imp.find_module(cfg['environment']['setup']['module'])
+    #s = imp.load_module(cfg['environment']['setup']['module'], *s)
+    #setup = getattr(s, cfg['environment']['setup']['class'])
 
     # Create UR5 Reacher2D environment
     env = env_class(
-            setup = setup,
+            setup                 = cfg['environment']['setup'], #setup,
             host                  = cfg['environment']['parameters']['host'],
             dof                   = cfg['environment']['parameters']['dof'],
             control_type          = cfg['environment']['parameters']['control_type'],

@@ -1,7 +1,7 @@
 global:
   seed:
     low: 1
-    high: !!python/object/apply:eval [ 2**31 - 1 ]
+    high: 2147483647 # 2**31 - 1
 environment:
   class: get_env
   module: environments/ur
@@ -9,6 +9,8 @@ environment:
     class: ReacherEnv
     module: senseact.envs.ur.reacher_env
   setup:
+    #class: setup
+    #module: utils/ur5_setup
     host: '192.168.1.100' # put UR5 Controller address here
     end_effector_low:
       - -0.2
