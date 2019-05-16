@@ -47,8 +47,48 @@ environment:
     speedj_a: 1.4
     target_type: position
   setup:
-    class: setup
-    module: utils/ur5_setup
+    accel_max: 1.0
+    angle_bound_buffer: 0.001
+    angles_high:
+    - 90
+    - -60
+    - 130
+    - 25
+    - 120
+    - 175
+    angles_low:
+    - 60
+    - -180
+    - -120
+    - -50
+    - 50
+    - 50
+    box_bound_buffer: 0.001
+    end_effector_high:
+    - 0.2
+    - 0.4
+    - 1.0
+    end_effector_low:
+    - -0.2
+    - -0.3
+    - 0.5
+    host: 192.168.1.100
+    ik_params:
+    - 0.089159
+    - -0.425
+    - -0.39225
+    - 0.10915
+    - 0.09465
+    - 0.0823
+    q_ref:
+    - 1.58724391
+    - -2.4
+    - 1.5
+    - -0.71790582
+    - 1.63685572
+    - 1.00910473
+    reset_speed_limit: 0.5
+    speed_max: 0.3
 global:
   seed:
     high: null

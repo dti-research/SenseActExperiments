@@ -124,10 +124,10 @@ if __name__ == '__main__':
     cfg['train']['artifact_path'] = args.log_dir
 
     # Set TRPO specific hyper-parameters
-    #cfg = set_trpo_hyperparameters(cfg)
+    cfg = set_trpo_hyperparameters(cfg)
 
     # Set PPO specific hyper-parameters
-    cfg = set_ppo_hyperparameters(cfg)
+    #cfg = set_ppo_hyperparameters(cfg)
 
     # Save configuration file
     new_conf_file = os.path.join(args.output_dir, args.output_filename)
