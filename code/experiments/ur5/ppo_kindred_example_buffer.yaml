@@ -1,3 +1,9 @@
+# Copyright (c) 2019, Danish Technological Institute.
+# All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree.
+
 global:
   seed:
     low: 1
@@ -7,25 +13,25 @@ environment:
   module: environments/ur
   codebase:
     class: ReacherEnv
-    module: senseact.envs.ur.reacher_env
+    module: senseact.envs.ur.reacher_env 
   setup:
     host: '192.168.1.100' # put UR5 Controller address here
-    end_effector_low:
+    end_effector_low: # Safety boundaries
       - -0.2
       - -0.3
       -  0.5
-    end_effector_high:
+    end_effector_high: # Safety boundaries
       -  0.2
       -  0.4
       -  1.0
-    angles_low:
+    angles_low: # Safety boundaries
       -   60
       - -180
       - -120
       -  -50
       -   50
       -   50
-    angles_high:
+    angles_high: # Safety boundaries
       -   90
       -  -60
       -  130
@@ -35,15 +41,15 @@ environment:
     speed_max: 0.3 # maximum joint speed magnitude using speedj
     accel_max: 1.0 # maximum acceleration magnitude of the leading axis using speedj
     reset_speed_limit: 0.5
-    q_ref: 
+    q_ref: # reset/home position when reset_type = zero
       -  1.58724391
       - -2.4
       -  1.5
       - -0.71790582
       -  1.63685572
       -  1.00910473
-    box_bound_buffer: 0.001
-    angle_bound_buffer: 0.001
+    box_bound_buffer: 0.001 # (meters)
+    angle_bound_buffer: 0.0 # (degrees) (was: 0.001 rad)
     ik_params: # Denavit Hartenberg Parameters
       -  0.089159 # d1
       - -0.42500  # a2
@@ -74,28 +80,28 @@ environment:
     delay: 0.0
 algorithm:
   class: train
-  module: algorithms/trpo
+  module: algorithms/ppo
   codebase:
     class: learn
-    module: baselines.trpo_mpi.trpo_mpi
+    module: baselines.ppo1.pposgd_simple
   hyperparameters:
     max_timesteps: 150000
     hid_size: 64
-    num_hid_layers: 2
-    timesteps_per_batch: 4096
-    vf_stepsize: 0.00472
-    max_kl: 0.02437
-    gamma: 0.96833
-    lam: 0.99874
-    # WARNING: Hardcoded values from Kindreds example.
-    #  https://github.com/kindredresearch/SenseAct/blob/master/examples/advanced/ur5_reacher.py#L78
-    #  - No explanation found in paper.
-    #  - No explanation from Kindred by mail correspondance.
-    vf_iters: 5
-    cg_iters: 10
-    cg_damping: 0.1
+    num_hid_layers: 3
+    batch_size: 512
+    gamma: 0.96836
+    lam: 0.99944
+    optim_batchsize: 16
+    optim_epochs: 10
+    optim_stepsize: 0.00005
+    # WARNING: Hardcoded values from Kindreds experiments.
+    #          Recieved via mail correspondance
+    clip_param: 0.2
+    entcoeff: 0.0
+    adam_epsilon: 1e-5
+    schedule: constant
 model:
   class: MlpPolicy
   module: baselines.ppo1.mlp_policy
 train:
-  artifact_path: artifacts/logs/trpo/
+  artifact_path: artifacts/logs/ppo/
