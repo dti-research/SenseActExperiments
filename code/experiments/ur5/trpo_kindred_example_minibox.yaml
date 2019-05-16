@@ -9,8 +9,6 @@ environment:
     class: ReacherEnv
     module: senseact.envs.ur.reacher_env
   setup:
-    #class: setup
-    #module: utils/ur5_setup
     host: '192.168.1.100' # put UR5 Controller address here
     end_effector_low:
       - -0.2
