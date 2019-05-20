@@ -26,12 +26,14 @@ def get_env(cfg):
     # Load the RL Environment
     env_module = importlib.import_module(cfg['environment']['codebase']['module'])
     env_class = getattr(env_module, cfg['environment']['codebase']['class'])
-    logging.debug(env_class)
+    logging.debug("Environment function: {}".format(env_class))
+
+    logging.debug("Host IP: {}".format(cfg['environment']['setup']['host']))
 
     # Create UR5 Reacher2D environment
     env = env_class(
             setup                 = cfg['environment']['setup'],
-            host                  = cfg['environment']['parameters']['host'],
+            host                  = cfg['environment']['setup']['host'],
             dof                   = cfg['environment']['parameters']['dof'],
             control_type          = cfg['environment']['parameters']['control_type'],
             target_type           = cfg['environment']['parameters']['target_type'],
@@ -63,7 +65,7 @@ def get_env(cfg):
     sess.__enter__()
     policy_fn_module = importlib.import_module(cfg['model']['module'])
     policy_fn_class = getattr(policy_fn_module, cfg['model']['class'])
-    logging.debug(policy_fn_class)
+    logging.debug("Policy function: {}".format(policy_fn_class))
 
     def policy_fn(name, ob_space, ac_space):
         return policy_fn_class(name           = name,
