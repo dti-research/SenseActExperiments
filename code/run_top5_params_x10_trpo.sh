@@ -56,13 +56,6 @@ do
 
     for j in {0..9} # number of tests for each hyperparameter configuration
     do
-        
-        echo "***********************************"
-        echo "* RESTARTING ROBOT"
-        echo "* Stand Clear!"
-        echo "***********************************"
-        python3 restart_ur.py
-
         echo " - Running test #$j for hyperparameter configuration $filename"
         python3 train.py -f $filename
     done
