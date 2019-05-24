@@ -54,9 +54,19 @@ do
     echo "* Configuration file: $filename"
     echo "***********************************"
 
-    for j in {0..9} # number of tests for each hyperparameter configuration
+    j=0
+    #for j in {0..9} # number of tests for each hyperparameter configuration
+    while [ $j -lt 10 ]
     do
         echo " - Running test #$j for hyperparameter configuration $filename"
         python3 train.py -f $filename
+
+        if [ $? -eq 0 ]; then
+            echo " - Test #$j succeeded!"
+            let j=j+1
+        else
+            echo " - Test #$j failed!"
+        fi
+        python3 utils/ur_reboot.py
     done
 done
