@@ -7,20 +7,12 @@ if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('192.168.1.100',29999))
 
-    #s.send("saveLog\n".encode('ascii'))
-    #s.recv(100)
-
     s.send("robotmode\n".encode('ascii'))
     time.sleep(.5)
     response = s.recv(100)
 
-    #s.send("safetymode\n".encode('ascii'))
-    #time.sleep(.5)
-    #response = s.recv(100)
-    #print(response)
     s.close()
 
-    #if "NO_CONTROLLER" in str(response):
     if "RUNNING" not in str(response):
         print("Some error occurred. UR Robotmode: {}".format(response))
         print("UR's Polyscope prob. lost connection to its controller. Rebooting robot...")
