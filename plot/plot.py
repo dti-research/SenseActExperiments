@@ -39,8 +39,13 @@ logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s',
                     stream=sys.stdout)
 
 def read_csv_files(path):
-    """ Read all csv files in dir
-
+    """Reads all CSV files in a directory
+    
+    Arguments:
+        path {str} -- Path to directory containing the CSV files
+    
+    Returns:
+        numpy array -- All data read from the CSV files
     """
     data = []
     files = os.listdir(path)
@@ -51,7 +56,7 @@ def read_csv_files(path):
 
     for f in files:
         d = np.genfromtxt(os.path.join(path,f), delimiter=',', skip_header=1)
-        if len(d) >= 36: data.append(d)
+        if len(d) == 36: data.append(d)
     
     return data
 
@@ -70,6 +75,8 @@ if __name__ == '__main__':
     for c in configurations:
         if c == 'same_seed': continue # Ignore same_seed folder
         
+        logging.info("Processing configuration: {0}".format(c))
+
         # Create path
         c_path = os.path.join(path, c)
 
@@ -80,7 +87,10 @@ if __name__ == '__main__':
         data.append(d)
 
     # Move axis
-    data = np.moveaxis(data, 2, 3)
+    data = np.array(data)
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            data[i][j] = np.moveaxis(data[i][j],0,1)   
 
     # Retrieve timestemps for configuration 0, run 0
     timesteps = data[0][0][1]
@@ -90,11 +100,15 @@ if __name__ == '__main__':
     for i in range(len(data)):
         rewards.append([r[2] for r in data[i]])
     
+    rewards = np.array(rewards)
+    for i in range(len(rewards)):
+        rewards[i] = np.moveaxis(rewards[i],0,1)  
+
     # Compute mean reward and its standard deviation
     rewards_mean = []
     rewards_std_dev = []
 
-    rewards = np.moveaxis(rewards, 1, 2)
+    #rewards = np.moveaxis(rewards, 1, 2)
     for r in rewards:
         conf_reward_means = []
         conf_reward_std_dev = []
@@ -104,24 +118,18 @@ if __name__ == '__main__':
         rewards_mean.append(conf_reward_means)
         rewards_std_dev.append(conf_reward_std_dev)
     
-    # green: 2ca02c
-    # blue: 1f77b4
     # orange: ff7f0e
+    # blue: 1f77b4
+    # green: 2ca02c
     # red: d62728
+    colors=["#ff7f0e", "#1f77b4", "#2ca02c", "#d62728"]
 
-    plt.plot(timesteps, rewards_mean[0], linewidth=3.0, label='Configuration 1',color='#ff7f0e')
-    plt.plot(timesteps, rewards_mean[1], linewidth=3.0, label='Configuration 2',color='#2ca02c')
-
-    plt.fill_between(timesteps,
-                     (np.array(rewards_mean[0]) - np.array(rewards_std_dev[0])),
-                     (np.array(rewards_mean[0]) + np.array(rewards_std_dev[0])),
-                     color='#ff7f0e',
-                     linewidth=0.0,
-                     alpha=0.3)
-    plt.fill_between(timesteps,
-                     (np.array(rewards_mean[1]) - np.array(rewards_std_dev[1])),
-                     (np.array(rewards_mean[1]) + np.array(rewards_std_dev[1])),
-                     color='#2ca02c',
+    for i in range(len(rewards_mean)):
+        plt.plot(timesteps, rewards_mean[i], linewidth=2.0, label='Configuration {}'.format(i),color=colors[i])
+        plt.fill_between(timesteps,
+                     (np.array(rewards_mean[i]) - np.array(rewards_std_dev[i])),
+                     (np.array(rewards_mean[i]) + np.array(rewards_std_dev[i])),
+                     color=colors[i],
                      linewidth=0.0,
                      alpha=0.3)
 
@@ -132,4 +140,4 @@ if __name__ == '__main__':
 
     plt.figure(1)
     plt.legend(loc='lower right')
-    plt.savefig('trpo.svg')
+    plt.savefig(os.path.join(args.output_path,'trpo.svg'))
