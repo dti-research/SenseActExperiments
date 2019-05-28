@@ -7,4 +7,6 @@
 # LICENSE file in the root directory of this source tree.
 
 
-python3 plot.py -p ../code/artifacts/logs/trpo --output-path plots/
+python3 plot_w_std_dev.py -p ../code/artifacts/logs/trpo \
+                          --output-filename trpo.pdf \
+                          --output-path plots/
