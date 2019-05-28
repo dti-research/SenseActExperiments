@@ -48,6 +48,9 @@
 # -54.55  512     0.00011     0.07420     0.99402     0.90185     1       2048
 # -125.13 256     0.00002     0.05471     0.99961     0.99877     4       32
 
+python3 utils/ur_kill_urcontrol.py
+python3 utils/ur_reboot.py
+python3 utils/ur_lock.py
 
 file=experiments/ur5/trpo/trpo_conf_1.yaml
 
@@ -56,7 +59,7 @@ echo "* Configuration file: $file"
 echo "***********************************"
 cat $file
 j=0
-while [ $j -lt 2 ]
+while [ $j -lt 1 ]
 do
     echo " - Running test #$j for hyperparameter configuration $file"
     python3 train.py -f $file
@@ -66,27 +69,9 @@ do
     else
         echo " - Test #$j failed!"
     fi
+    python3 utils/ur_kill_urcontrol.py
     python3 utils/ur_reboot.py
-done
-
-file2=experiments/ur5/trpo/trpo_conf_2.yaml
-
-echo "***********************************"
-echo "* Configuration file: $file2"
-echo "***********************************"
-
-let j=0
-while [ $j -lt 2 ]
-do
-    echo " - Running test #$j for hyperparameter configuration $file2"
-    python3 train.py -f $file2
-    if [ $? -eq 0 ]; then
-        echo " - Test #$j succeeded!"
-        let j=j+1
-    else
-        echo " - Test #$j failed!"
-    fi
-    python3 utils/ur_reboot.py
+    python3 utils/ur_lock.py
 done
 
 file3=experiments/ur5/trpo/trpo_conf_3.yaml
@@ -106,6 +91,29 @@ do
     else
         echo " - Test #$j failed!"
     fi
+    python3 utils/ur_kill_urcontrol.py
     python3 utils/ur_reboot.py
+    python3 utils/ur_lock.py
 done
 
+file4=experiments/ur5/trpo/trpo_conf_4.yaml
+
+echo "***********************************"
+echo "* Configuration file: $file4"
+echo "***********************************"
+
+let j=0
+while [ $j -lt 10 ]
+do
+    echo " - Running test #$j for hyperparameter configuration $file4"
+    python3 train.py -f $file4
+    if [ $? -eq 0 ]; then
+        echo " - Test #$j succeeded!"
+        let j=j+1
+    else
+        echo " - Test #$j failed!"
+    fi
+    python3 utils/ur_kill_urcontrol.py
+    python3 utils/ur_reboot.py
+    python3 utils/ur_lock.py
+done

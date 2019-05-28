@@ -55,8 +55,7 @@ do
     echo "***********************************"
 
     j=0
-    #for j in {0..9} # number of tests for each hyperparameter configuration
-    while [ $j -lt 10 ]
+    while [ $j -lt 10 ] # number of tests for each hyperparameter configuration
     do
         echo " - Running test #$j for hyperparameter configuration $filename"
         python3 train.py -f $filename
@@ -66,7 +65,12 @@ do
             let j=j+1
         else
             echo " - Test #$j failed!"
+            python3 utils/ur_reboot.py
+            python3 utils/ur_lock.py
         fi
+        # HACK:
+        python3 utils/ur_kill_urcontrol.py
         python3 utils/ur_reboot.py
+        python3 utils/ur_lock.py
     done
 done
