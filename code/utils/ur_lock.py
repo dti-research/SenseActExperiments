@@ -8,3 +8,4 @@ if __name__ == "__main__":
 
     s.send("setUserRole locked\n".encode('ascii'))
     s.close()
+    time.sleep(2)
