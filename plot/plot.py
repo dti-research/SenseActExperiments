@@ -49,6 +49,7 @@ def read_csv_files(path):
     """
     data = []
     files = os.listdir(path)
+    print(files)
 
     if len(files) == 0:
         logging.error("No files found in dir: {}".format(path))
@@ -72,9 +73,7 @@ if __name__ == '__main__':
     # Empty placeholder for all configurations
     data = []
 
-    for c in configurations:
-        if c == 'same_seed': continue # Ignore same_seed folder
-        
+    for c in configurations:       
         logging.info("Processing configuration: {0}".format(c))
 
         # Create path
@@ -115,8 +114,11 @@ if __name__ == '__main__':
         for v in r:
             conf_reward_means.append(np.mean(v))
             conf_reward_std_dev.append(np.std(v))
+            print(v)
         rewards_mean.append(conf_reward_means)
         rewards_std_dev.append(conf_reward_std_dev)
+        print("std:dev")
+        print(conf_reward_std_dev)
     
     # orange: ff7f0e
     # blue: 1f77b4
@@ -140,4 +142,4 @@ if __name__ == '__main__':
 
     plt.figure(1)
     plt.legend(loc='lower right')
-    plt.savefig(os.path.join(args.output_path,'trpo.svg'))
+    plt.savefig(os.path.join(args.output_path,'trpo.pdf'))
