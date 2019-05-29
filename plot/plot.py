@@ -59,6 +59,10 @@ def read_csv_files(path):
         return
 
     for f in files:
+        # Check that there is data in the file
+        if os.stat(os.path.join(path,f)).st_size == 0: continue
+        
+        # Read in the data
         d = np.genfromtxt(os.path.join(path,f), delimiter=',', skip_header=1)
         if len(d) == 36: data.append(d)
     

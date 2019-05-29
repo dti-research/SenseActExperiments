@@ -1,11 +1,25 @@
 import time
 import socket
 import paramiko
+import argparse
+
+# Setup argparser
+parser = argparse.ArgumentParser(description='Kills the URControl process via SSH',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("--robot-ip",
+                    help="robot ip",
+                    metavar="192.168.1.100",
+                    required=True)
+parser.add_argument('--username', dest='username',
+                    default="root",
+                    type=str,
+                    help='name of the user at the robot')
+args = parser.parse_args()
 
 if __name__ == "__main__":
     # Connect to the robot's dashboard interface and save the log
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('192.168.1.100',29999))
+    s.connect((args.robot_ip,29999))
 
     s.send("robotmode\n".encode('ascii'))
     time.sleep(.5)
@@ -22,7 +36,7 @@ if __name__ == "__main__":
     # Reboot robot controller
     p = paramiko.SSHClient()
     p.set_missing_host_key_policy(paramiko.AutoAddPolicy())   # This script doesn't work for me unless this line is added!
-    p.connect("192.168.1.100", username="root", password="easybot")
+    p.connect(args.robot_ip, username=args.username, password="easybot")
     #stdin, stdout, stderr = p.exec_command("/sbin/reboot")
     print("Rebooting PolyScope (pkill java)!")
     stdin, stdout, stderr = p.exec_command("pkill java")
@@ -38,7 +52,7 @@ if __name__ == "__main__":
 
     # Connect to robot's dashboard interface again
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('192.168.1.100',29999))
+    s.connect((args.robot_ip,29999))
 
     # Close the "Go To Initialize Screen" popup
     s.send("close popup\n".encode('ascii'))
