@@ -98,7 +98,7 @@ if __name__ == '__main__':
             "#2ca02c"] # green
 
     for i in range(len(rewards)):
-        plt.plot(timesteps, rewards[i], linewidth=0.5, color=colors[i]) # label='Run {}'.format(i+1),
+        plt.plot(timesteps, rewards[i], linewidth=0.5, label='', color=colors[i]) # label='Run {}'.format(i+1),
 
     plt.xticks(np.arange(3e4, 17e4,step=3e4),('30K\n36 min','60K\n72 min','90K\n108 min','120K\n 144 min','150K\n180 min'))
     plt.xlabel('Timesteps',fontweight='bold', labelpad=0)
@@ -106,5 +106,4 @@ if __name__ == '__main__':
     plt.title('TRPO Configuration 1 - Same Seed',fontweight='bold')
 
     plt.figure(1)
-    plt.legend(loc='lower right')
     plt.savefig(os.path.join(args.output_path,args.output_filename))

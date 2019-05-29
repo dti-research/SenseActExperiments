@@ -10,6 +10,10 @@ parser.add_argument("--robot-ip",
                     help="robot ip",
                     metavar="192.168.1.100",
                     required=True)
+parser.add_argument('--sim', dest='sim',
+                    default=False,
+                    type=bool,
+                    help='Using UR simulator?')
 parser.add_argument('--username', dest='username',
                     default="root",
                     type=str,
@@ -17,14 +21,16 @@ parser.add_argument('--username', dest='username',
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    # Connect to the robot's dashboard interface and save the log
+    # Connect to the robot's dashboard interface (port 29999)
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((args.robot_ip,29999))
 
+    # Get state of the robot
     s.send("robotmode\n".encode('ascii'))
     time.sleep(.5)
     response = s.recv(100)
 
+    # Close TCP/IP connection
     s.close()
 
     if "RUNNING" not in str(response):
@@ -33,18 +39,23 @@ if __name__ == "__main__":
     else:
         exit(0)
     
-    # Reboot robot controller
+    # Reboot UR's PolyScope via SSH
     p = paramiko.SSHClient()
-    p.set_missing_host_key_policy(paramiko.AutoAddPolicy())   # This script doesn't work for me unless this line is added!
+    p.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     p.connect(args.robot_ip, username=args.username, password="easybot")
-    #stdin, stdout, stderr = p.exec_command("/sbin/reboot")
     print("Rebooting PolyScope (pkill java)!")
-    stdin, stdout, stderr = p.exec_command("pkill java")
-    opt = stdout.readlines()
-    opt = "".join(opt)
-    print(opt)
+    p.exec_command("pkill java")
+
+    if sim:
+        # UR simulator does not automatically reboot when killed. Manual rebooting:
+        p.exec_command("export DISPLAY=:0; nohup bash ursim-current/start-ursim.sh UR5 &>/dev/null &")
+        time.sleep(2)
+    
+    p.close()
 
     # Wait for the robot to come online
+    # - Robot controller: 100s
+    # - PolyScope: 45s
     for x in range(45):
         print('Reconnecting in {0}s   '.format(45-x), end="\r")
         time.sleep(1)
@@ -57,27 +68,25 @@ if __name__ == "__main__":
     # Close the "Go To Initialize Screen" popup
     s.send("close popup\n".encode('ascii'))
     s.recv(100)
-
     time.sleep(0.5)
 
     # Power on robot arm
     s.send("power on\n".encode('ascii'))
     s.recv(100)
-
     time.sleep(5)
 
     # Brake release
     s.send("brake release\n".encode('ascii'))
     s.recv(100)
-
     time.sleep(5)
 
+    # Get the robot state
     s.send("robotmode\n".encode('ascii'))
-    time.sleep(.5)
     response = s.recv(100)
-
-    s.close()
     time.sleep(2)
+
+    # Close TCP/IP connection
+    s.close()
 
     if "RUNNING" not in str(response):
         print("Some unknown error occurred after rebooting the robot... Need human assistance!")

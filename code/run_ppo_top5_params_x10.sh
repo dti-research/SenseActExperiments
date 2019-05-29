@@ -65,12 +65,12 @@ do
             let j=j+1
         else
             echo " - Test #$j failed!"
-            python3 utils/ur_reboot.py
-            python3 utils/ur_lock.py
         fi
-        # HACK:
+        # HACK: Kill URControl process after each run
         python3 utils/ur_kill_urcontrol.py
         python3 utils/ur_reboot.py
-        python3 utils/ur_lock.py
+        python3 utils/ur_send_string_command.py -ip 192.168.1.100 \
+                                                -p 29999 \
+                                                -c "setUserRole locked"
     done
 done

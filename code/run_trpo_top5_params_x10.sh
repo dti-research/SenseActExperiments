@@ -48,16 +48,29 @@
 # -54.55  512     0.00011     0.07420     0.99402     0.90185     1       2048
 # -125.13 256     0.00002     0.05471     0.99961     0.99877     4       32
 
-for filename in experiments/ur5/trpo_buffer/*.yaml # configurations to run
+for filename in experiments/ur5/trpo/*.yaml # configurations to run
 do
     echo "***********************************"
     echo "* Configuration file: $filename"
     echo "***********************************"
 
-    for j in {0..9} # number of tests for each hyperparameter configuration
+    j=0
+    while [ $j -lt 10 ] # number of tests for each hyperparameter configuration
     do
         echo " - Running test #$j for hyperparameter configuration $filename"
-        
         python3 train.py -f $filename
+
+        if [ $? -eq 0 ]; then
+            echo " - Test #$j succeeded!"
+            let j=j+1
+        else
+            echo " - Test #$j failed!"
+        fi
+        # HACK: Kill URControl process after each run
+        python3 utils/ur_kill_urcontrol.py
+        python3 utils/ur_reboot.py
+        python3 utils/ur_send_string_command.py -ip 192.168.1.100 \
+                                                -p 29999 \
+                                                -c "setUserRole locked"
     done
 done

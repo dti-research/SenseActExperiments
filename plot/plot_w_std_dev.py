@@ -124,15 +124,17 @@ if __name__ == '__main__':
         print("std:dev")
         print(conf_reward_std_dev)
     
-    # orange: ff7f0e
-    # blue: 1f77b4
-    # green: 2ca02c
-    # red: d62728
-    # violet: ad3fbf
-    # magenta: 00aec4
-    # purple: 5e2ab5
-    # light-green: c1cd14
-    colors=["#ff7f0e", "#1f77b4", "#2ca02c", "#d62728"]
+    colors=["#ff7f0e", # orange
+            "#1f77b4", # blue
+            "#2ca02c", # green
+            "#d62728", # red
+            "#ad3fbf", # violet
+            "#00aec4", # magenta
+            "#5e2ab5", # purple
+            "#c1cd14", # light-green
+            "#ff7f0e", # orange
+            "#1f77b4", # blue
+            "#2ca02c"] # green
 
     for i in range(len(rewards_mean)):
         plt.plot(timesteps, rewards_mean[i], linewidth=2.0, label='Configuration {}'.format(i+1),color=colors[i])

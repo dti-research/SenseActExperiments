@@ -6,11 +6,13 @@ import argparse
 # Setup argparser
 parser = argparse.ArgumentParser(description='Sends a string (URScript) command to the UR',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--robot-ip",
+parser.add_argument("-ip", "--robot-ip",
+                    dest="robot_ip",
                     help="robot ip",
                     metavar="192.168.1.100",
                     required=True)
-parser.add_argument("--robot-port",
+parser.add_argument("-p", "--robot-port",
+                    dest="robot_port",
                     help="robot port",
                     metavar="29999",
                     required=True)
