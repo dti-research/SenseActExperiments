@@ -46,7 +46,7 @@ if __name__ == "__main__":
     print("Rebooting PolyScope (pkill java)!")
     p.exec_command("pkill java")
 
-    if sim:
+    if args.sim:
         # UR simulator does not automatically reboot when killed. Manual rebooting:
         p.exec_command("export DISPLAY=:0; nohup bash ursim-current/start-ursim.sh UR5 &>/dev/null &")
         time.sleep(2)
@@ -56,40 +56,50 @@ if __name__ == "__main__":
     # Wait for the robot to come online
     # - Robot controller: 100s
     # - PolyScope: 45s
-    for x in range(45):
-        print('Reconnecting in {0}s   '.format(45-x), end="\r")
+    if args.sim:
+        wait = 15
+    else:
+        wait = 45
+
+    for x in range(wait):
+        print('Reconnecting in {0}s   '.format(wait-x), end="\r")
         time.sleep(1)
     print('')
+    
+    if not args.sim:
+        # Connect to robot's dashboard interface again
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((args.robot_ip,29999))
 
-    # Connect to robot's dashboard interface again
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((args.robot_ip,29999))
+        # Close the "Go To Initialize Screen" popup
+        s.send("close popup\n".encode('ascii'))
+        s.recv(100)
+        time.sleep(0.5)
 
-    # Close the "Go To Initialize Screen" popup
-    s.send("close popup\n".encode('ascii'))
-    s.recv(100)
-    time.sleep(0.5)
+        # Power on robot arm
+        s.send("power on\n".encode('ascii'))
+        s.recv(100)
+        time.sleep(5)
 
-    # Power on robot arm
-    s.send("power on\n".encode('ascii'))
-    s.recv(100)
-    time.sleep(5)
+        # Brake release
+        s.send("brake release\n".encode('ascii'))
+        s.recv(100)
+        time.sleep(5)
 
-    # Brake release
-    s.send("brake release\n".encode('ascii'))
-    s.recv(100)
-    time.sleep(5)
+        # Get the robot state
+        s.send("robotmode\n".encode('ascii'))
+        response = s.recv(100)
+        time.sleep(2)
 
-    # Get the robot state
-    s.send("robotmode\n".encode('ascii'))
-    response = s.recv(100)
-    time.sleep(2)
+        # Close TCP/IP connection
+        s.close()
 
-    # Close TCP/IP connection
-    s.close()
-
-    if "RUNNING" not in str(response):
-        print("Some unknown error occurred after rebooting the robot... Need human assistance!")
-        exit(1)
+        if "RUNNING" not in str(response):
+            print("Some unknown error occurred after rebooting the robot... Need human assistance!")
+            exit(1)
+        else:
+            print("Rebooted succesfully")
+            exit(0)
     else:
+        print("Rebooted URSim succesfully")
         exit(0)

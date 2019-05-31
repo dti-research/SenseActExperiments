@@ -6,9 +6,20 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
-python3 utils/ur_kill_urcontrol.py --robot-ip 10.224.60.159 --username ur
-python3 utils/ur_reboot.py --robot-ip 10.224.60.159 --username ur
-python3 utils/ur_lock.py --robot-ip 10.224.60.159
+robot_ip=10.224.60.159
+robot_port=29999
+robot_sim_username=ur
+
+
+python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                   --username $robot_sim_username \
+                                   --sim True
+python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                           --username $robot_sim_username \
+                           --sim True
+python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                        -p $robot_port \
+                                        -c "setUserRole locked"
 
 file=experiments/ur5/trpo_ursim_same_seed.yaml
 j=0
@@ -23,9 +34,13 @@ do
         echo " - Test #$j failed!"
     fi
     # HACK: Kill URControl process after each run
-    python3 utils/ur_kill_urcontrol.py --robot-ip 10.224.60.159 --username ur
-    python3 utils/ur_reboot.py --robot-ip 10.224.60.159 --username ur
-    python3 utils/ur_send_script_command.py -ip 10.224.60.159 \
-                                            -p 29999 \
+    python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                       --username $robot_sim_username \
+                                       --sim True
+    python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                               --username $robot_sim_username \
+                               --sim True
+    python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                            -p $robot_port \
                                             -c "setUserRole locked"
 done

@@ -10,6 +10,10 @@ parser.add_argument("-ip", "--robot-ip",
                     help="robot ip",
                     metavar="192.168.1.100",
                     required=True)
+parser.add_argument('--sim', dest='sim',
+                    default=False,
+                    type=bool,
+                    help='Using UR simulator?')
 parser.add_argument('--username', dest='username',
                     default="root",
                     type=str,
@@ -26,5 +30,5 @@ if __name__ == "__main__":
               password="easybot")
     
     print("HACK: Killing robot controller")
-    p.exec_command("pkill URControl")
+    p.exec_command("sudo pkill URControl" if args.sim else "pkill URControl")
     time.sleep(2)

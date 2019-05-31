@@ -18,6 +18,7 @@ parser.add_argument("-p", "--robot-port",
                     required=True)
 parser.add_argument("-c", "--command",
                     dest="command",
+                    type=str,
                     required=True)
 args = parser.parse_args()
 
@@ -25,7 +26,9 @@ if __name__ == "__main__":
     # Connect to the robot's dashboard interface and save the log
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((args.robot_ip, int(args.robot_port)))
+    print(s.recv(100))
 
-    s.send(args.command+"\n".encode('ascii'))
+    s.send((args.command+"\n").encode('ascii'))
+    time.sleep(0.1)
+    print(s.recv(100))
     s.close()
-    time.sleep(2)
