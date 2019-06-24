@@ -35,6 +35,8 @@ parser.add_argument('--num_hid_layers', type=int, default=None,
                     help='number of hidden layers (default: None)')
 parser.add_argument('--batch_size', type=int, default=None,
                     help='input batch size for training (default: None)')
+parser.add_argument('--timesteps_per_batch', type=int, default=None,
+                    help='input batch size for training (default: None)')
 parser.add_argument('--vf_stepsize', type=float, default=None,
                     help='stepsize (default:None)')
 parser.add_argument('--max_kl', type=float, default=None,
@@ -64,7 +66,7 @@ def set_trpo_hyperparameters(cfg):
     Returns
         cfg (dict) : Updated YAML dict
     """
-    cfg['algorithm']['hyperparameters']['timesteps_per_batch']  = args.batch_size
+    cfg['algorithm']['hyperparameters']['timesteps_per_batch']  = args.timesteps_per_batch
     cfg['algorithm']['hyperparameters']['max_kl']               = args.max_kl
     cfg['algorithm']['hyperparameters']['vf_stepsize']          = args.vf_stepsize    
     cfg['algorithm']['hyperparameters']['gamma']                = args.gamma

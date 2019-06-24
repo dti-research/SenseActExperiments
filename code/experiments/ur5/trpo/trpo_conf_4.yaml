@@ -4,20 +4,17 @@ algorithm:
     class: learn
     module: baselines.trpo_mpi.trpo_mpi
   hyperparameters:
-    batch_size: 2048
     cg_damping: 0.1
     cg_iters: 10
     gamma: 0.96801
     hid_size: 32
     lam: 0.96893
-    max_kl: 0.02437
+    max_kl: 0.0051
     max_timesteps: 150000
     num_hid_layers: 4
-    optim_batchsize: null
-    optim_stepsize: null
-    timesteps_per_batch: 4096
+    timesteps_per_batch: 2048
     vf_iters: 5
-    vf_stepsize: 0.00472
+    vf_stepsize: 0.00163
   module: algorithms/trpo
 environment:
   class: get_env
@@ -48,7 +45,7 @@ environment:
     target_type: position
   setup:
     accel_max: 1.0
-    angle_bound_buffer: 0.001
+    angle_bound_buffer: 0.0
     angles_high:
     - 90
     - -60

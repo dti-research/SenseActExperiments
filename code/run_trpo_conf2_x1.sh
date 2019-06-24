@@ -48,45 +48,34 @@
 # -54.55  512     0.00011     0.07420     0.99402     0.90185     1       2048
 # -125.13 256     0.00002     0.05471     0.99961     0.99877     4       32
 
-# Sorted: Average return descending
-hid_size=(64 128 64 128 32 8 8 64 128 128 16 32 128 8 8 128 32 32 16 8 32 64 256 16 16 64 128 8 2048 32)
-num_hid_layers=(2 1 4 4 4 3 1 1 2 3 4 3 2 3 4 2 4 4 4 3 3 3 1 1 2 3 4 3 1 4)
-batch_size=(4096 2048 8192 4096 2048 4096 4096 8192 2048 2048 4096 512 8192 1024 4096 8192 1024 8192 512 512 8192 512 512 256 8192 512 256 8192 512 256)
-vf_stepsize=(0.00472 0.00475 0.00037 0.00036 0.00163 0.00926 0.00005 0.00005 0.00001 0.00770 0.00282 0.00054 0.00009 0.00007 0.00222 0.00004 0.00435 0.00001 0.00034 0.00001 0.00023 0.00251 0.00003 0.00065 0.00001 0.00005 0.00003 0.00018 0.00011 0.00002)
-max_kl=(0.02437 0.01909 0.31222 0.01952 0.00510 0.01659 0.21515 0.09138 0.06088 0.02278 0.02312 0.01882 0.10678 0.02759 0.00392 0.25681 0.00518 0.03385 0.01319 0.00351 0.01305 0.00532 0.00727 0.04867 0.31390 0.15077 0.12650 0.00333 0.07420 0.05471)
-gamma=(0.96833 0.99924 0.97433 0.99799 0.96801 0.99935 0.99891 0.99677 0.98488 0.99414 0.99813 0.99728 0.97415 0.99945 0.98544 0.99750 0.99516 0.99119 0.97334 0.99430 0.95963 0.99447 0.99686 0.99926 0.99948 0.96836 0.99260 0.98940 0.99402 0.99961)
-lamda=(0.99874 0.99003 0.99647 0.92958 0.96893 0.99711 0.99880 0.99959 0.99957 0.98684 0.99964 0.99420 0.99759 0.99961 0.98067 0.98955 0.99867 0.98400 0.98524 0.99781 0.99950 0.99951 0.93165 0.98226 0.99204 0.99944 0.98021 0.97090 0.90185 0.99877)
+robot_ip=192.168.1.100
+robot_port=29999
+robot_username=root
+use_sim=False
 
-echo "*********************************************"
-echo "* Generating Experiment Configuration Files *"
-echo "*********************************************"
+# HACK: Kill URControl process
+python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                   --username $robot_username
+python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                           --username $robot_username
+python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                        -p $robot_port \
+                                        -c "setUserRole locked"
 
-for i in {0..4} # number of configurations to run
-do
-    echo "***********************************"
-    echo "* Step $i/4"
-    echo "***********************************"
-    echo "* Hyperparameter Configuration #$i"
-    echo "* - Hidden sizes: ${hid_size[$i]}"
-    echo "* - Num. hid. layers: ${num_hid_layers[$i]}"
-    echo "* - Batch size: ${batch_size[$i]}"
-    echo "* - VF stepsize: ${vf_stepsize[$i]}"
-    echo "* - Max KL: ${max_kl[$i]}"
-    echo "* - Gamma: ${gamma[$i]}"
-    echo "* - Lamda: ${lamda[$i]}"
-    echo "***********************************"
+file=experiments/ur5/trpo/trpo_conf_2.yaml
 
-    python3 generate_conf_file.py \
-            --filename=../ur5/trpo_kindred_example.yaml \
-            --hid_size=${hid_size[$i]} \
-            --num_hid_layers=${num_hid_layers[$i]} \
-            --timesteps_per_batch=${batch_size[$i]} \
-            --batch_size=${batch_size[$i]} \
-            --vf_stepsize=${vf_stepsize[$i]} \
-            --max_kl=${max_kl[$i]} \
-            --gamma=${gamma[$i]} \
-            --lamda=${lamda[$i]} \
-            --output_filename=trpo_conf_$i.yaml \
-            --output_dir=../ur5/trpo/ \
-            --log_dir=artifacts/logs/trpo/$i
-done
+echo " - Running test for hyperparameter configuration $file"
+python3 train.py -f $file
+if [ $? -eq 0 ]; then
+    echo " - Test succeeded!"
+else
+    echo " - Test failed!"
+fi
+# HACK: Kill URControl process after each run
+python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                   --username $robot_username
+python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                           --username $robot_username
+python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                        -p $robot_port \
+                                        -c "setUserRole locked"

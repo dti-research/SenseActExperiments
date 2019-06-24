@@ -48,6 +48,19 @@
 # -94.34    512     0.00645     32          0.99447 0.99951 3       64
 # -134.43   256     0.00689     128         0.99961 0.99877 4       32
 
+robot_ip=192.168.1.100
+robot_port=29999
+robot_username=root
+
+# HACK: Kill URControl process
+python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                   --username $robot_username
+python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                           --username $robot_username
+python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                        -p $robot_port \
+                                        -c "setUserRole locked"
+
 for filename in experiments/ur5/ppo/*.yaml # configurations to run
 do
     echo "***********************************"
@@ -67,10 +80,12 @@ do
             echo " - Test #$j failed!"
         fi
         # HACK: Kill URControl process after each run
-        python3 utils/ur_kill_urcontrol.py
-        python3 utils/ur_reboot.py
-        python3 utils/ur_send_string_command.py -ip 192.168.1.100 \
-                                                -p 29999 \
+        python3 utils/ur_kill_urcontrol.py --robot-ip $robot_ip \
+                                           --username $robot_username
+        python3 utils/ur_reboot.py --robot-ip $robot_ip \
+                                   --username $robot_username
+        python3 utils/ur_send_string_command.py -ip $robot_ip \
+                                                -p $robot_port \
                                                 -c "setUserRole locked"
     done
 done
