@@ -61,7 +61,7 @@ def read_csv_files(path):
 
     for f in files:
         d = np.genfromtxt(os.path.join(path,f), delimiter=',', skip_header=1)
-        if len(d) == 36: data.append(d)
+        data.append(d)
     
     return data
 
@@ -91,12 +91,12 @@ if __name__ == '__main__':
 
     # Move axis
     data = np.array(data)
+    timesteps = []
     for i in range(len(data)):
         for j in range(len(data[i])):
             data[i][j] = np.moveaxis(data[i][j],0,1)   
-
-    # Retrieve timestemps for configuration 0, run 0
-    timesteps = data[0][0][1]
+        #Retrieve timesteps
+        timesteps.append(data[i][0][1])
 
     # Retrieve rewards
     rewards = []

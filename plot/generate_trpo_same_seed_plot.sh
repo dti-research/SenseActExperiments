@@ -7,6 +7,6 @@
 # LICENSE file in the root directory of this source tree.
 
 
-python3 plot.py -p ../code/artifacts/logs/trpo_same_seed/0 \
-                --output-filename trpo_same_seed.pdf \
+python plot.py -p ../code/artifacts/logs/trpo_same_seed/1 \
+                --output-filename trpo_same_seed2.pdf \
                 --output-path plots/
