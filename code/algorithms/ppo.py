@@ -60,8 +60,7 @@ def train(cfg):
     # Train
     m = importlib.import_module(cfg['algorithm']['codebase']['module'])
     learn = getattr(m, cfg['algorithm']['codebase']['class'])
-    logging.debug(learn)
-    logging.debug(type(cfg['algorithm']['hyperparameters']['adam_epsilon']))
+    logging.debug("Learn function: {}".format(learn))
 
     learn(env, policy_fn,
           max_timesteps            = cfg['algorithm']['hyperparameters']['max_timesteps'],

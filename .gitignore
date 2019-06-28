@@ -4,3 +4,4 @@ __pycache__
 *.pyc
 senseact/lib/
 senseact.egg-info/
+code/artifacts/terminal
