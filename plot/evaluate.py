@@ -1,13 +1,13 @@
 import os
-import csv
-import numpy as np
-from io import StringIO
-import matplotlib.pyplot as plt
 import math
-import statsmodels.stats.api as sms
 import pandas as pd
-from fitter import Fitter
+import numpy as np
+import matplotlib.pyplot as plt
+import bootstrapped.bootstrap as bas
+import bootstrapped.stats_functions as bs_stats
+import statsmodels.stats.api as sms
 
+from fitter import Fitter
 
 # Specify where to find log files
 path = "../code/artifacts/logs/trpo/0/"
@@ -42,7 +42,7 @@ avg_rews = []
 for r in rews:
     avg_rews.append(np.mean(r))
 
-
+"""
 # Perform bootstrapping on data
 R = 10000 # Number of resamples
 means = []
@@ -63,13 +63,29 @@ plt.title(('Empirical Distribution of ' + name),fontweight='bold')
 #plt.figure(1)
 #plt.savefig('plots/' + filename + '_dist.pdf')
 
-f = Fitter(means)
+# TODO fit empirical distribution to the most suited one to determine proper statistic
+
+
+"""
+
+# Estimate mean using bootstrapping
+sim = bas.bootstrap(np.array(avg_rews), stat_func=bs_stats.mean)
+print("95 percent CI: \n mean: %.2f (lower: %.2f, upper: %.2f)\n\n" % (sim.value, sim.lower_bound, sim.upper_bound))
+
+# Estimate distribution using bootstrapping
+dist = bas.bootstrap(np.array(avg_rews), stat_func=bs_stats.mean, return_distribution=True)
+
+#, 
+
+# Distributions to consider when fitting
+distributions=['alpha', 'anglit', 'argus', 'betaprime', 'burr', 'burr12', 'cauchy', 'chi', 'chi2', 'cosine', 'crystalball', 'dgamma', 'dweibull', 'exponweib','exponnorm', 'exponpow', 'f', 'fatiguelife', 'fisk', 'foldcauchy', 'foldnorm', 'frechet_r', 'frechet_l', 'genlogistic', 'gennorm', 'genextreme', 'gausshyper', 'gamma', 'gengamma', 'genhalflogistic', 'gilbrat', 'gompertz', 'gumbel_r', 'gumbel_l', 'hypsecant', 'invgamma', 'invgauss', 'invweibull', 'johnsonsb', 'johnsonsu', 'kappa3', 'kappa4', 'kstwobign', 'laplace', 'levy', 'levy_l', 'logistic', 'loglaplace', 'maxwell', 'moyal', 'norm', 'pearson3', 'powerlognorm', 'powernorm','reciprocal', 'rayleigh', 'rice', 'recipinvgauss', 'semicircular', 'skewnorm', 't', 'trapz', 'triang', 'truncnorm', 'tukeylambda', 'vonmises_line', 'wald', 'weibull_min', 'weibull_max']
+
+f = Fitter(dist, distributions=distributions)
 f.fit()
 f.summary()
+print(f.get_best())
 
 
-
-# TODO fit empirical distribution to the most suited one to determine proper statistic
 
 # Retrieve rewards at each timestep 
 rew_cols = []
@@ -90,7 +106,7 @@ for rewards in rew_cols:
     rew_std_errs.append(np.std(rewards, ddof=1)/math.sqrt(len(rewards)))
 
 # Values that may be useful for calculating statistics
-print('\nAverage rewards: \n {} \n\n'.format(avg_rews))
+print('Average rewards: \n {} \n\n'.format(avg_rews))
 print('Standard errors: \n {} \n\n'.format(rew_std_errs))
 print('Sample mean: {} \n\n'.format(np.mean(avg_rews)))
 print('Sample standard deviation: {} \n\n'.format(np.std(avg_rews)))
