@@ -103,7 +103,7 @@ if __name__ == '__main__':
     plt.xticks(np.arange(3e4, 17e4,step=3e4),('30K\n36 min','60K\n72 min','90K\n108 min','120K\n 144 min','150K\n180 min'))
     plt.xlabel('Timesteps',fontweight='bold', labelpad=0)
     plt.ylabel('Average Returns',fontweight='bold')
-    plt.title('TRPO Configuration 1 - Same Seed',fontweight='bold')
+    plt.title('TRPO Configuration 1 - Same Seed\nSimulated Robot',fontweight='bold')
 
     plt.figure(1)
     plt.savefig(os.path.join(args.output_path,args.output_filename))
