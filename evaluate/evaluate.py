@@ -167,7 +167,7 @@ if __name__ == '__main__':
     (mu, sigma) = st.norm.fit(resampled_data)
 
     # Create histogram plot
-    bins=50
+    bins=int(math.sqrt(len(resampled_data)))
     plt.hist(resampled_data, bins=bins, density=True, alpha=0.4, edgecolor='k')
 
     xmin, xmax = plt.xlim()
