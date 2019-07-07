@@ -9,6 +9,7 @@
 i=0
 seed=20
 algorithm=trpo
+values=(158.56 138.58 131.35 123.45 122.60)
 path=../code/artifacts/logs/$algorithm
 
 for d in $path/*
@@ -20,6 +21,7 @@ do
                             --algorithm $algorithm \
                             --configuration $i \
                             --output-path plots/fitted_dists/seed$seed/ \
+                            --value=${values[$i]} \
                             --seed=$seed
         let i=i+1
     fi

@@ -32,6 +32,11 @@ parser.add_argument("--configuration",
                     metavar="NUMBER",
                     type=int,
                     required=True)
+parser.add_argument("--value",
+                    help="reported value to test against",
+                    metavar="AVG_RETURN",
+                    type=float,
+                    required=True)
 parser.add_argument("--seed",
                     help="seed for the random number generator",
                     metavar="SEED",
@@ -47,7 +52,6 @@ args = parser.parse_args()
 # Seed for reproducibility
 # Seed 20 result: powernorms
 np.random.seed(args.seed)
-print(args.seed)
 
 # Keep for bookkeeping!
 #def compute_kl_div(p, q):
@@ -98,6 +102,11 @@ def read_csv_files(path):
     return data
 
 def load_all_distributions():
+    """[summary]
+    
+    Returns:
+        [type] -- [description]
+    """
     distributions = []
     for this in dir(scipy.stats):
         if "fit" in eval("dir(scipy.stats." + this +")"):
@@ -105,6 +114,15 @@ def load_all_distributions():
     return distributions
 
 def get_xticks(plt, data):
+    """[summary]
+    
+    Arguments:
+        plt {[type]} -- [description]
+        data {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
     # find minimum and maximum of xticks, so we know
     # where we should compute theoretical distribution
     xt = plt.xticks()[0]  
@@ -113,6 +131,18 @@ def get_xticks(plt, data):
     return lnspc
 
 def fit_distributions(data, distributions, lnspc, output_dir, output_postfix):
+    """[summary]
+    
+    Arguments:
+        data {[type]} -- [description]
+        distributions {[type]} -- [description]
+        lnspc {[type]} -- [description]
+        output_dir {[type]} -- [description]
+        output_postfix {[type]} -- [description]
+    
+    Returns:
+        [type] -- [description]
+    """
     # Open file to write to
     #csv_file_path = os.path.join(log_dir, args.algorithm + '_conf_' + str(args.configuration) + '.csv')
     csv_file_path = os.path.join(output_dir, args.algorithm + '_conf_' + str(args.configuration) + output_postfix + '_52.csv')
@@ -184,6 +214,14 @@ def fit_distributions(data, distributions, lnspc, output_dir, output_postfix):
     return dist_names, dist_params, ks_test_p, ks_test_statistics
 
 def fit_best_pdf(data, distribution, lnspc, output_dir):
+    """[summary]
+    
+    Arguments:
+        data {[type]} -- [description]
+        distribution {[type]} -- [description]
+        lnspc {[type]} -- [description]
+        output_dir {[type]} -- [description]
+    """
     # Get callable
     dist = getattr(scipy.stats, distribution)
 
@@ -203,7 +241,50 @@ def fit_best_pdf(data, distribution, lnspc, output_dir):
     plt.plot(lnspc, best_pdf, label=distribution)
     plt.legend()
     plt.savefig(os.path.join(output_dir, args.algorithm.lower() + '_conf_' + str(args.configuration) + '_best_fit.pdf'))
-    
+
+def compute_probabilities(edf, distributions, lnspc, value):
+    # Get values at least as good as reported
+    values_at_least_as_good = edf[edf >= value]
+    values_at_least_as_good_idx = np.nonzero(edf >= value)[0]
+
+    # Debugging
+    #print("Number of samples, better than reported: {}".format(len(values_at_least_as_good_idx)))
+    #print("   Values: {}".format(values_at_least_as_good))
+    #print("   Indices: {}".format(values_at_least_as_good_idx))
+    #print("Value at index {}: {}".format(values_at_least_as_good_idx[0]-1, d[values_at_least_as_good_idx[0]-1]))
+
+    # Normalise to obtain probabilities
+    values_at_least_as_good /= edf.sum()
+    pv = np.sum(values_at_least_as_good)
+
+    print("-----------------------------------------------------------------------------------------------------------------------------")
+    print("Computing probability of obtaining at least as extreme a value as: {}".format(value))
+    print("p-value \t\tDistribution")
+    print("-----------------------------------------------------------------------------------------------------------------------------")
+    for distribution in distributions:
+        try:
+            # Get callable
+            dist = getattr(scipy.stats, distribution)
+
+            # Fit theoretical distribution to empirical one
+            params = dist.fit(d)
+
+            # Extract the PDF using the generated parameters
+            pdf = dist.pdf(lnspc, *params)
+
+            # Determine goodness of fit by Kolmogorov-Smirnov test
+            (statistic, p) = scipy.stats.kstest(d, distribution, params)
+
+            # Compute probability: P(v>threshold|dist=d, data) = Pv * Pd
+            pd = p
+
+            if p==0.0:
+                print("{:.4f}\t\t{}".format(pv*pd, distribution))
+            else:
+                print("{:.4f}\t{}".format(pv*pd, distribution))
+            
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
     # Generate output dir
@@ -232,6 +313,7 @@ if __name__ == '__main__':
 
     # Estimate distribution using bootstrapping
     d = bas.bootstrap(np.array(avg_rews), stat_func=bs_stats.mean, return_distribution=True)
+    d.sort()
 
     ############################
     ## All distributions (100) #
@@ -266,9 +348,10 @@ if __name__ == '__main__':
     print(dist_names)
     
     """
-    ########################
-    # Top-12 Distributions #
-    ########################
+    
+    #######################
+    # Top-6 Distributions #
+    #######################
     #distributions = ['beta', 'crystalball', 'exponnorm', 'f', 'gennorm', 'johnsonsb', 'johnsonsu', 'loggamma', 'norm', 'powernorm', 'skewnorm', 't']
     distributions = ['beta', 'johnsonsb', 'johnsonsu', 'loggamma', 'powernorm', 'skewnorm']
     # Plot normed histogram with fitted distributions
@@ -280,12 +363,16 @@ if __name__ == '__main__':
     # where we should compute theoretical distribution
     lnspc = get_xticks(plt, d)
 
+    """
     # Fit distributions to our data
     dist_names, dist_params, ks_test_p, ks_test_statistics = fit_distributions(d,distributions, lnspc, output_dir=log_dir, output_postfix='_6_dists')
 
     # Sort the lists together (keeping them in sync)
     ks_test_p, dist_names = (list(t) for t in zip(*sorted(zip(ks_test_p, dist_names))))
 
-
     fit_best_pdf(d, dist_names[-1], lnspc, log_dir)
-    #"""
+    """
+    
+    # Compute P-values
+    compute_probabilities(d, distributions, lnspc, args.value)
+    

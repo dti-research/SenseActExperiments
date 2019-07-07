@@ -9,6 +9,7 @@
 i=0
 seed=20
 algorithm=ppo
+values=(176.62 150.25 137.92 137.26 136.09)
 path=../code/artifacts/logs/$algorithm
 
 for d in $path/*
@@ -20,6 +21,7 @@ do
                             --algorithm $algorithm \
                             --configuration $i \
                             --output-path plots/fitted_dists/seed$seed/ \
+                            --value=${values[$i]} \
                             --seed=$seed
         let i=i+1
     fi
