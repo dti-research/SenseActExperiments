@@ -1,6 +1,12 @@
 # SenseActExperiments
 A Survey on Reproducibility by Evaluating Deep Reinforcement Learning Algorithms on Real-World Robots
 
+## Citing
+
+For our fork of [SenseAct](https://github.com/dti-research/SenseAct) and our replication work on the experiments please cite Lynnerup et al. (2019).
+
+* Lynnerup, N. A., Nolling, L., Hallam, J., Hasle, R. (2019). [A Survey on Reproducibility by Evaluating Deep Reinforcement Learning Algorithms on Real-World Robots](https://arxiv.org/abs/1909.03772). In *Proceedings of the 3rd International Conference on Robot Learning - Volume 100.* (Osaka, Japan). Proceedings of Machine Learning Research (PMLR).
+
 ## TL;DR show me how to run it!
 
 To run the experiments you need to have a working install of [Docker](https://docs.docker.com/) prior to proceeding.
@@ -51,15 +57,7 @@ code
 
 All code for generating reported figures and statistical inference is located in the evaluate folder, at the root of this repo.
 
-## Setting up the robot
-
-This section will cover the setup of both the real-world UR5 and its offline simulator if you don't have a real-world robot.
-
-### Real-World UR5
-
-- [ ] Obtain USB with magic script to create snapshots of UR teach-pendant
-
-### Offline Simulator
+## Setting up the offline robot simulator
 
 1. Go to https://www.universal-robots.com/download/
 1. Select robot type (CB- or e-series)
