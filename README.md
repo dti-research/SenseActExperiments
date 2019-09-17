@@ -60,7 +60,7 @@ All code for generating reported figures and statistical inference is located in
 ## Setting up the offline robot simulator
 
 1. Go to https://www.universal-robots.com/download/
-1. Select robot type (CB- or e-series)
+1. Select robot type (CB3)
 1. Choose "Software"
 1. Choose "Offline Simulator"
 1. Choose "Non Linux" (to get their VM)
