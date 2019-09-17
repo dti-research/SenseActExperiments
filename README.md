@@ -70,6 +70,6 @@ All code for generating reported figures and statistical inference is located in
 1. Start the VM
 1. Inside the VM verify in the terminal that you have an IP and try to ping it from your host machine.
 1. Start the offline simulator by double-clicking it on the VM desktop.
-1. Simply set the IP address (in the setup.py file) to the one of your VM and you're good to go
+1. Simply set the IP address (in the experiment file, e.g. [trpo_kindred_example.yaml](code/experiments/ur5/trpo_kindred_example.yaml)) to the one of your VM and you're good to go
 
 **Warning!** You should **not** run VM on the same machine you run Docker on!
