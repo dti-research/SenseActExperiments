@@ -7,6 +7,10 @@ For our fork of [SenseAct](https://github.com/dti-research/SenseAct) and our rep
 
 * Lynnerup, N. A., Nolling, L., Hallam, J., Hasle, R. (2019). [A Survey on Reproducibility by Evaluating Deep Reinforcement Learning Algorithms on Real-World Robots](https://arxiv.org/abs/1909.03772). In *Proceedings of the 3rd International Conference on Robot Learning - Volume 100.* (Osaka, Japan). Proceedings of Machine Learning Research (PMLR).
 
+## Next steps
+
+This work inspired us to initiate the development of a system that would remove much of the boilerplate code requirements for doing reproducible research. This system has become a CLI and is called [Tracker](https://github.com/dti-research/tracker). Head overthere for a more generic approach to reproducible research.
+
 ## TL;DR show me how to run it!
 
 To run the experiments you need to have a working install of [Docker](https://docs.docker.com/) prior to proceeding.
